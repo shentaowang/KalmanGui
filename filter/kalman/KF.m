@@ -1,11 +1,11 @@
-function [ filtered_x ] = KF(x_init, Z, Q, R, F, H )
+function  filtered_xs  = KF(x, ZS, P, Q, R, F, H)
 %   linear kalamn filter
 %     Attributes
 %     ----------
-%     x_init :matrix(dim_x, 1)
+%     x :matrix(dim_x, 1)
 %     The initial x
 %
-%     Z :matrix(dim_data, dim_z)
+%     ZS :matrix(dim_data, dim_z)
 %         Measurement inputs, dim_data means how many measurement data you
 %         get
 %
@@ -42,10 +42,16 @@ function [ filtered_x ] = KF(x_init, Z, Q, R, F, H )
 %     x_pre : matrix(dim_x, 1)
 %         The predict of x
 dim_x = size(P,1);
-dim_z = size(Z,1);
-dim_data = size(Z,1)
-
-
-
+dim_z = size(ZS,1);
+dim_data = size(ZS,2);
+filtering_xs = zeros(dim_x, dim_data);
+for i=1:dim_data
+    P_PRE = F * P * F' + Q;
+    K = P_PRE * H' / (H * P_PRE * H' + R);
+    x_pre = F * x;
+    x = x_pre + K * (ZS(:,i) - H * x_pre);
+    filtering_xs(:,i) = x;
+end
+filtered_xs = filtering_xs;
 end
 
