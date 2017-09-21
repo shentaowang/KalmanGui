@@ -1,4 +1,4 @@
-root_path = 'E:\Light\学习\研究生准备\蔡老师\背景知识\code\KalmanGui';
+root_path = '../../../../KalmanGui';
 addpath(genpath(root_path));
 fp = fopen('data01.txt');
 ZS = [];
