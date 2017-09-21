@@ -1,2 +1,4 @@
 # KalmanGui
-The gui for kf, ekf, ukf. Allow user to define the model.
+kalman滤波的GUI。
+针对为非时变系统，包括KF,EKF,UKF。
+
