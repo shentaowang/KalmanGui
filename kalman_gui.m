@@ -55,6 +55,8 @@ function KalmanGui_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for KalmanGui
 handles.output = hObject;
 
+%add my code 
+
 % Update handles structure
 guidata(hObject, handles);
 
