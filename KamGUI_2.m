@@ -166,7 +166,7 @@ Wei_Z=Allneed2.Wei_Z;
 for r=1:1
 prompt={'X0:(n¡Á1)           PS£ºThe "X0" format is given!','P0:(n¡Án)','Sampling Period','Spatial Dimension','Measurement Space'};
 title='Original State Parameters';
-    row=[8,8,1,1,1]';col=[50,50,50,50,50]';
+row=[8,8,1,1,1]';col=[50,50,50,50,50]';
 lines=[row,col];
 def={num2str(X0),num2str(P0),num2str(T1),num2str(Wei),num2str(Wei_Z)};
   options.Resize='on';options.WindowStyle='normal';options.Interpreter='none';

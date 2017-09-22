@@ -50,14 +50,18 @@ function main_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 %define the global variable
 %need to add the explain for variable
-global observe_data;
-global compare_data;
-global init_x;
-global init_p;
-global init_q;
-global init_r;
-global init_f;
-global init_h;
+global observe_data; observe_data = [];
+global compare_data; compare_data = [];
+global init_x; init_x = 0;
+global init_p; init_p = [];
+global init_q; init_q = [];
+global init_r; init_r = [];
+global init_f; init_f = 0;
+global init_h; init_h = 0;
+global dim_x; dim_x = 0;
+global dim_z; dim_z = 0;
+global sample_t; sample_t = 0;
+
 % Update handles structure
 guidata(hObject, handles);
 
@@ -75,6 +79,10 @@ function import_observe_Callback(hObject, eventdata, handles)
 global observe_data;
 observe_data = [];
 [f_name, p_name] = uigetfile('*.txt');
+%if choose the cancle
+if isequal(p_name,0)
+    return;
+end
 full_name = fullfile(p_name, f_name);
 
 fp = fopen(full_name);
@@ -84,8 +92,9 @@ while 1
         break;
     end
     tline = str2num(tline);
+    %check if the data is standard, but need more rule
     if isempty(tline)
-        msgbox('please input the standard data', 'Error', 'error');
+        msgbox('Please input the standard data', 'Error', 'error');
         observe_data = [];
         return;
     end
@@ -99,6 +108,66 @@ function import_compare_Callback(hObject, eventdata, handles)
 
 
 function init_state_Callback(hObject, eventdata, handles)
+global init_x;
+global init_p;
+global dim_x;
+global dim_z;
+global sample_t;
+prompt = {'Enter the x dimension', 'Enter the z dimension',...
+    'Enter the sampling time:(s)'};
+title = 'Original State Part1 ';
+customer = [1 50;1 50; 1 50];
+defaultans  = {'0', '0', '0'};
+options.Resize='off';options.WindowStyle='normal';options.Interpreter='none';
+answer=inputdlg(prompt,title,customer,defaultans,options);
+if isempty(answer)
+    return;
+else
+    dim_x = str2num(answer{1});
+    dim_z = str2num(answer{2});
+    sample_t = str2num(answer{3});
+end
+
+if (dim_x * dim_z) == 0
+    msgbox('Please init the data dimension', 'Error', 'error');
+    return;
+else
+    if sample_t == 0
+         button = questdlg('Do you want to reload the sampling time',...
+             'prompt','Yes', 'No', 'Yes');
+    else
+        button = 'No';
+    end
+end
+if strcmp(button, 'No')
+    prompt = {'Initial the x:(n*1)', 'Initial the p:(n*n)'};
+    title = 'Original State Part2 ';
+    customer = [10 60;10 60];
+    defaultans  = {num2str(zeros(dim_x,1)), num2str(zeros(dim_x,dim_x))};
+    options.Resize='off';options.WindowStyle='normal';options.Interpreter='none';
+    answer=inputdlg(prompt,title,customer,defaultans,options);
+else
+    return;
+end
+
+if isempty(answer)
+    return;
+else
+    init_x = str2num(answer{1});
+    init_p = str2num(answer{2});
+end
+
+if isequal(init_x, zeros(dim_x,1)) || isequal(init_p, zeros(dim_x,dim_x))
+    msgbox('Please initial the state', 'Error', 'error');
+end
+    
+
+
+
+
+
+
+
 
 
 function init_model_Callback(hObject, eventdata, handles)
