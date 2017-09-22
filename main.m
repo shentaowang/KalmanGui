@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 22-Sep-2017 15:02:25
+% Last Modified by GUIDE v2.5 22-Sep-2017 20:52:59
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -61,6 +61,14 @@ global init_h; init_h = 0;
 global dim_x; dim_x = 0;
 global dim_z; dim_z = 0;
 global sample_t; sample_t = 0;
+%may have:
+% lti_kf(linear time invariant and use basic kalman filter)
+% ltv_kf(linear time-varying  and use basic kalman filter)
+% nlti_ekf(Nonlinear Time invariant and use extend kalman filter)
+% nlti_ukf(Nonlinear Time invariant and use unscented kalman filter)
+% nltv_ekf(Nonlinear Time varying and use extend kalman filter)
+% nltv_ukf(Nonlinear Time varying and use unscented kalman filter)
+handles.model = 'lti_kf';
 
 % Update handles structure
 guidata(hObject, handles);
@@ -161,13 +169,54 @@ if isequal(init_x, zeros(dim_x,1)) || isequal(init_p, zeros(dim_x,dim_x))
     msgbox('Please initial the state', 'Error', 'error');
 end
     
-
-
-
-
-
-
-
-
-
 function init_model_Callback(hObject, eventdata, handles)
+% lti_kf(linear time invariant and use basic kalman filter)
+str_kf = 'basic kalman filter';
+str_lti = 'linear time invariant';
+% ltv_kf(linear time-varying  and use basic kalman filter)
+str_ltv = 'linear time-varying';
+% nlti_ekf(Nonlinear Time invariant and use extend kalman filter)
+% nlti_ukf(Nonlinear Time invariant and use unscented kalman filter)
+str_ekf = 'extend kalman filter';
+str_ukf = 'unscent kalman filter';
+str_nlti = 'Nonlinear Time invariant';
+% nltv_ekf(Nonlinear Time varying and use extend kalman filter)
+% nltv_ukf(Nonlinear Time varying and use unscented kalman filter)
+str_nltv = 'Nonlinear Time varying';
+try
+    choice = menu('choose the model type', str_lti, str_ltv, str_nlti, str_nltv);
+catch
+    return;
+end
+
+switch choice
+    case 1
+        handles.model = 'lti';
+    case 2
+        handles.model = 'ltv';
+    case 3
+        handles.model = 'nlti';
+    case 4
+        handles.model = 'nltv';
+    otherwise
+            return;
+end
+
+
+try
+    choice = menu('choose the model type', str_kf, str_ekf, str_ukf);
+catch
+    return;
+end
+switch choice
+    case 1
+        handles.model = strcat(handles.model,'_kf');
+    case 2
+        handles.model = strcat(handles.model,'_ekf');
+    case 3
+        handles.model = strcat(handles.model,'_ukf');
+    otherwise
+            return;
+end
+handles.model
+

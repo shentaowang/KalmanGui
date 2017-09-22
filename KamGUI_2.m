@@ -1,5 +1,3 @@
-
-
 function varargout = KamGUI_2(varargin)
 % KAMGUI_2 MATLAB code for KamGUI_2.fig
 %      KAMGUI_2, by itself, creates a new KAMGUI_2 or raises the existing
