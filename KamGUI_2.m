@@ -24,7 +24,7 @@ function varargout = KamGUI_2(varargin)
 
 % Edit the above text to modify the response to help KamGUI_2
 
-% Last Modified by GUIDE v2.5 20-Apr-2014 15:24:09
+% Last Modified by GUIDE v2.5 22-Sep-2017 14:55:10
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1830,3 +1830,12 @@ function PromptObserve_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 msgbox({'Symbols are limited to be used as "x y z"';'  '},'Prompt')
+
+
+function pushbutton23_Callback(hObject, eventdata, handles)
+
+
+function Observed_KeyPressFcn(hObject, eventdata, handles)
+
+
+function Observed_ButtonDownFcn(hObject, eventdata, handles)
