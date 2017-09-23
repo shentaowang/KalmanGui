@@ -56,12 +56,19 @@ function init_param_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 global DIM_MAX; DIM_MAX = 10;
 global SAMPLE_T_MAX; SAMPLE_T_MAX = 10000;
+global init_x;
+global init_p;
+global init_q;
+global init_r;
+global init_f;
+global init_h;
 global dim_x;
 global dim_z;
 global sample_t;
+global islegal_param;
 is_inrange = dim_x > 0 && dim_x < DIM_MAX && dim_z > 0 && dim_z < DIM_MAX;
 is_integer = (dim_x == fix(dim_x)) && (dim_z == fix(dim_z));
-if is_inrange && is_integer
+if is_inrange && is_integer && ~islegal_param
     set(handles.edit_dim_x,'string',num2str(dim_x));
     set(handles.edit_dim_z,'string',num2str(dim_z));
     set(handles.edit_init_x,'string',num2str(zeros(1, dim_x)));
@@ -70,6 +77,15 @@ if is_inrange && is_integer
     set(handles.edit_observe,'string',num2str(zeros(dim_z,dim_x)));
     set(handles.edit_init_q,'string',num2str(zeros(dim_x,dim_x)));
     set(handles.edit_init_r,'string',num2str(zeros(dim_z,dim_z)));
+elseif is_inrange && is_integer && islegal_param
+    set(handles.edit_dim_x,'string',num2str(dim_x));
+    set(handles.edit_dim_z,'string',num2str(dim_z));
+    set(handles.edit_init_x,'string',num2str(init_x));
+    set(handles.edit_init_p,'string',num2str(init_p));
+    set(handles.edit_transition,'string',num2str(init_f));
+    set(handles.edit_observe,'string',num2str(init_h));
+    set(handles.edit_init_q,'string',num2str(init_q));
+    set(handles.edit_init_r,'string',num2str(init_r));
 else
     set(handles.edit_dim_x,'string','');
     set(handles.edit_dim_z,'string','');
@@ -260,7 +276,64 @@ end
 
 function pushbutton_check_Callback(hObject, eventdata, handles)
 global islegal_param;
-
+global init_x;
+global init_p;
+global init_q;
+global init_r;
+global init_f;
+global init_h;
+global dim_x;
+global dim_z;
+global sample_t;
+global transition_style;
+global observe_style;
+global DIM_MAX;
+global SAMPLE_T_MAX;
+combine_style = strcat(transition_style,observe_style);
+switch combine_style
+    case 'matrixmatrix'
+        is_inrange = dim_x > 0 && dim_x < DIM_MAX && dim_z > 0 &&...
+            dim_z < DIM_MAX;
+        is_integer = dim_x == fix(dim_x) && dim_z == fix(dim_z);
+        combine_dim1 = size(init_p,1) * size(init_q,1) * size(init_r,1) *...
+            size(init_f,1) * size(init_h,1) * size(init_x,1);
+        combine_dim2 = size(init_p,2) * size(init_q,2) * size(init_r,2) *...
+            size(init_f,2) * size(init_h,2) * size(init_x,2);
+        is_matrix_true  = combine_dim1==(dim_x^4 * dim_z^2) &&...
+            combine_dim2==(dim_x^4 * dim_z);
+        if ~is_inrange
+            msgbox('输入参数维度和采样时间超过范围','Error','error');
+            islegal_param = 0;
+            return;
+        end
+        if ~is_integer
+            msgbox('输入参数维度为非整数','Error','error');
+            islegal_param = 0;
+            return;
+        end
+        if ~is_matrix_true
+            msgbox('参数未全部初始化或者初始化有误','Error','error');
+            islegal_param = 0;
+            return;
+        end
+    case 'matrixformula'
+        msgbox('此功能未完成','Warn','warn');
+        islegal_param = 0;
+        return;
+    case 'formulamatrix'
+        msgbox('此功能未完成','Warn','warn');
+        islegal_param = 0;
+        return;
+    case 'formulaformula'
+        msgbox('此功能未完成','Warn','warn');
+        islegal_param = 0;
+        return;
+    otherwise
+        msgbox('选择矩阵形式或者方程形式','Error','error');
+        islegal_param = 0;
+        return;
+end
+msgbox('初始化完成','Success');
 islegal_param = 1;
 
 
