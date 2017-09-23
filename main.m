@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 22-Sep-2017 20:52:59
+% Last Modified by GUIDE v2.5 23-Sep-2017 08:44:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -61,15 +61,8 @@ global init_h; init_h = 0;
 global dim_x; dim_x = 0;
 global dim_z; dim_z = 0;
 global sample_t; sample_t = 0;
-%may have:
-% lti_kf(linear time invariant and use basic kalman filter)
-% ltv_kf(linear time-varying  and use basic kalman filter)
-% nlti_ekf(Nonlinear Time invariant and use extend kalman filter)
-% nlti_ukf(Nonlinear Time invariant and use unscented kalman filter)
-% nltv_ekf(Nonlinear Time varying and use extend kalman filter)
-% nltv_ukf(Nonlinear Time varying and use unscented kalman filter)
-handles.model = 'lti_kf';
-
+global transition_style; transition_style = 'matrix';
+global observe_style; observe_style = 'matrix';
 % Update handles structure
 guidata(hObject, handles);
 
@@ -115,108 +108,11 @@ end
 function import_compare_Callback(hObject, eventdata, handles)
 
 
-function init_state_Callback(hObject, eventdata, handles)
-global init_x;
-global init_p;
-global dim_x;
-global dim_z;
-global sample_t;
-prompt = {'Enter the x dimension', 'Enter the z dimension',...
-    'Enter the sampling time:(s)'};
-title = 'Original State Part1 ';
-customer = [1 50;1 50; 1 50];
-defaultans  = {'0', '0', '0'};
-options.Resize='off';options.WindowStyle='normal';options.Interpreter='none';
-answer=inputdlg(prompt,title,customer,defaultans,options);
-if isempty(answer)
-    return;
-else
-    dim_x = str2num(answer{1});
-    dim_z = str2num(answer{2});
-    sample_t = str2num(answer{3});
-end
 
-if (dim_x * dim_z) == 0
-    msgbox('Please init the data dimension', 'Error', 'error');
-    return;
-else
-    if sample_t == 0
-         button = questdlg('Do you want to reload the sampling time',...
-             'prompt','Yes', 'No', 'Yes');
-    else
-        button = 'No';
-    end
-end
-if strcmp(button, 'No')
-    prompt = {'Initial the x:(n*1)', 'Initial the p:(n*n)'};
-    title = 'Original State Part2 ';
-    customer = [10 60;10 60];
-    defaultans  = {num2str(zeros(dim_x,1)), num2str(zeros(dim_x,dim_x))};
-    options.Resize='off';options.WindowStyle='normal';options.Interpreter='none';
-    answer=inputdlg(prompt,title,customer,defaultans,options);
-else
-    return;
-end
-
-if isempty(answer)
-    return;
-else
-    init_x = str2num(answer{1});
-    init_p = str2num(answer{2});
-end
-
-if isequal(init_x, zeros(dim_x,1)) || isequal(init_p, zeros(dim_x,dim_x))
-    msgbox('Please initial the state', 'Error', 'error');
-end
-    
-function init_model_Callback(hObject, eventdata, handles)
-% lti_kf(linear time invariant and use basic kalman filter)
-str_kf = 'basic kalman filter';
-str_lti = 'linear time invariant';
-% ltv_kf(linear time-varying  and use basic kalman filter)
-str_ltv = 'linear time-varying';
-% nlti_ekf(Nonlinear Time invariant and use extend kalman filter)
-% nlti_ukf(Nonlinear Time invariant and use unscented kalman filter)
-str_ekf = 'extend kalman filter';
-str_ukf = 'unscent kalman filter';
-str_nlti = 'Nonlinear Time invariant';
-% nltv_ekf(Nonlinear Time varying and use extend kalman filter)
-% nltv_ukf(Nonlinear Time varying and use unscented kalman filter)
-str_nltv = 'Nonlinear Time varying';
-try
-    choice = menu('choose the model type', str_lti, str_ltv, str_nlti, str_nltv);
-catch
-    return;
-end
-
-switch choice
-    case 1
-        handles.model = 'lti';
-    case 2
-        handles.model = 'ltv';
-    case 3
-        handles.model = 'nlti';
-    case 4
-        handles.model = 'nltv';
-    otherwise
-            return;
-end
+function init_param_Callback(hObject, eventdata, handles)
+init_param();
+pause(0.01);
+close(main);
 
 
-try
-    choice = menu('choose the model type', str_kf, str_ekf, str_ukf);
-catch
-    return;
-end
-switch choice
-    case 1
-        handles.model = strcat(handles.model,'_kf');
-    case 2
-        handles.model = strcat(handles.model,'_ekf');
-    case 3
-        handles.model = strcat(handles.model,'_ukf');
-    otherwise
-            return;
-end
-handles.model
 
