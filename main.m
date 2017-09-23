@@ -64,6 +64,7 @@ global sample_t; sample_t = 0;
 global transition_style; transition_style = 'matrix';
 global observe_style; observe_style = 'matrix';
 global DIM_MAX; DIM_MAX = 10;
+global SAMPLE_T_MAX; SAMPLE_T_MAX = 10000;
 % Update handles structure
 guidata(hObject, handles);
 
