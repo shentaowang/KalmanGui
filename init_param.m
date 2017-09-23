@@ -22,7 +22,7 @@ function varargout = init_param(varargin)
 
 % Edit the above text to modify the response to help init_param
 
-% Last Modified by GUIDE v2.5 23-Sep-2017 09:52:12
+% Last Modified by GUIDE v2.5 23-Sep-2017 10:10:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -77,9 +77,13 @@ function edit_x_dim_Callback(hObject, eventdata, handles)
 global dim_x;
 str = get(hObject,'string');
 val = str2double(str);
-dim_x = val;
-set(handles.edit_init_x,'string',num2str(zeros(1, dim_x)));
-set(handles.edit_init_p,'string',num2str(zeros(dim_x,dim_x)));
+if isnumeric(val) && ~isempty(val)
+    dim_x = val;
+    set(handles.edit_init_x,'string',num2str(zeros(1, dim_x)));
+    set(handles.edit_init_p,'string',num2str(zeros(dim_x,dim_x)));
+else
+    return;
+end
 
 function edit_x_dim_CreateFcn(hObject, eventdata, handles)
 
@@ -192,4 +196,46 @@ function uibuttongroup_transition_CreateFcn(hObject, eventdata, handles)
 
 
 function uibuttongroup_transition_SelectionChangedFcn(hObject, eventdata, handles)
+global transition_style;
+global dim_x;
+%此处需要修改
+if isnumeric(dim_x) && ~isempty(dim_x)
+    switch get(hObject , 'tag')
+        case 'radiobutton_transition_matrix'
+            transition_style = 'matrix';
+            str  = num2str(zeros(dim_x,dim_x));
+            set(handles.edit_transition,'string',str);
+        case 'radiobutton_trasition_formula'
+            transition_style = 'formula';
+        otherwise
+            msgbox('选择状态转移方程时出错','Error','error');
+    end
+else
+    return;
+end
+
+
+function uibuttongroup_observe_SelectionChangedFcn(hObject, eventdata, handles)
+global observe_style;
+switch get(hObject , 'tag')
+    case 'radiobutton_observe_matrix'
+        observe_style = 'matrix';
+        
+    case 'radiobutton_observe_formula'
+        observe_style = 'formula';
+    otherwise
+            msgbox('选择观测方程时出错','Error','error');
+end
+
+
+function radiobutton_transition_matrix_CreateFcn(hObject, eventdata, handles)
+set(hObject,'value',1);
+
+
+function uibuttongroup_observe_CreateFcn(hObject, eventdata, handles)
+
+function radiobutton_observe_matrix_CreateFcn(hObject, eventdata, handles)
+set(hObject,'value',1);
+
+function radiobutton_observe_formula_CreateFcn(hObject, eventdata, handles)
 
