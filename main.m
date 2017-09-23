@@ -65,24 +65,8 @@ global transition_style;
 global observe_style;
 global islegal_param;
 global DIM_MAX; DIM_MAX = 10;
-global SAMPLE_T_MAX; SAMPLE_T_MAX = 10000;
-try 
-    if islegal_param == 0
-        observe_data = [];
-        compare_data = [];
-        init_x = 0;
-        init_p = [];
-        init_q = [];
-        init_r = [];
-        init_f = 0;
-        init_h = 0;
-        dim_x = 0;
-        dim_z = 0;
-        sample_t = 0;
-        transition_style = 'matrix';
-        observe_style = 'matrix';
-    end
-catch
+global SAMPLE_T_MAX; SAMPLE_T_MAX = 10000; 
+if isempty(islegal_param)
     islegal_param = 0;
     observe_data = [];
     compare_data = [];
@@ -97,6 +81,20 @@ catch
     sample_t = 0;
     transition_style = 'matrix';
     observe_style = 'matrix';
+else
+    if islegal_param == 0
+        init_x = 0;
+        init_p = [];
+        init_q = [];
+        init_r = [];
+        init_f = 0;
+        init_h = 0;
+        dim_x = 0;
+        dim_z = 0;
+        sample_t = 0;
+        transition_style = 'matrix';
+        observe_style = 'matrix';
+    end
 end
 % Update handles structure
 guidata(hObject, handles);

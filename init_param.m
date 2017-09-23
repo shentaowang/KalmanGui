@@ -22,7 +22,7 @@ function varargout = init_param(varargin)
 
 % Edit the above text to modify the response to help init_param
 
-% Last Modified by GUIDE v2.5 23-Sep-2017 18:31:02
+% Last Modified by GUIDE v2.5 23-Sep-2017 20:16:00
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -68,6 +68,8 @@ if is_inrange && is_integer
     set(handles.edit_init_p,'string',num2str(zeros(dim_x,dim_x)));
     set(handles.edit_transition,'string',num2str(zeros(dim_x,dim_x)));
     set(handles.edit_observe,'string',num2str(zeros(dim_z,dim_x)));
+    set(handles.edit_init_q,'string',num2str(zeros(dim_x,dim_x)));
+    set(handles.edit_init_r,'string',num2str(zeros(dim_z,dim_z)));
 else
     set(handles.edit_dim_x,'string','');
     set(handles.edit_dim_z,'string','');
@@ -75,6 +77,8 @@ else
     set(handles.edit_init_p,'string','');
     set(handles.edit_transition,'string','');
     set(handles.edit_observe,'string','');
+    set(handles.edit_init_q,'string','');
+    set(handles.edit_init_r,'string','');
 end
 
 is_inrange = sample_t > 0 && sample_t < SAMPLE_T_MAX;
@@ -115,12 +119,14 @@ if is_inrange && is_integer
     set(handles.edit_init_p,'string',num2str(zeros(dim_x,dim_x)));
     set(handles.edit_transition,'string',num2str(zeros(dim_x,dim_x)));
     set(handles.edit_observe,'string',num2str(zeros(dim_z,dim_x)));
+    set(handles.edit_init_q,'string',num2str(zeros(dim_x,dim_x)));
 else
     dim_x = 0;
     set(handles.edit_init_x,'string','');
     set(handles.edit_init_p,'string','');
     set(handles.edit_transition,'string','');
     set(handles.edit_observe,'string','');
+    set(handles.edit_init_q,'string','');
 end
 
 function edit_dim_x_CreateFcn(hObject, eventdata, handles)
@@ -143,9 +149,11 @@ is_integer = val == fix(val);
 if is_inrange && is_integer
     dim_z = val;
     set(handles.edit_observe,'string',num2str(zeros(dim_z,dim_x)));
+    set(handles.edit_init_r,'string',num2str(zeros(dim_z,dim_z)));
 else
     dim_z = 0;
     set(handles.edit_observe,'string','');
+    set(handles.edit_init_r,'string',num2str(zeros(dim_z,dim_z)));
 end
 
 
@@ -251,7 +259,9 @@ end
 
 
 function pushbutton_check_Callback(hObject, eventdata, handles)
-handles.state = 1;
+global islegal_param;
+
+islegal_param = 1;
 
 
 function uibuttongroup_transition_CreateFcn(hObject, eventdata, handles)
@@ -314,3 +324,35 @@ function radiobutton_observe_matrix_CreateFcn(hObject, eventdata, handles)
 set(hObject,'value',1);
 
 function radiobutton_observe_formula_CreateFcn(hObject, eventdata, handles)
+
+
+function edit_init_q_Callback(hObject, eventdata, handles)
+global init_q;
+str = get(hObject,'string');
+val = str2num(str);
+init_q = val;
+
+
+function edit_init_q_CreateFcn(hObject, eventdata, handles)
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+function edit_init_r_Callback(hObject, eventdata, handles)
+global init_r;
+str = get(hObject,'string');
+val = str2num(str);
+init_r = val;
+
+
+function edit_init_r_CreateFcn(hObject, eventdata, handles)
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
