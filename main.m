@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 23-Sep-2017 08:44:51
+% Last Modified by GUIDE v2.5 23-Sep-2017 10:52:13
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -63,6 +63,7 @@ global dim_z; dim_z = 0;
 global sample_t; sample_t = 0;
 global transition_style; transition_style = 'matrix';
 global observe_style; observe_style = 'matrix';
+global DIM_MAX; DIM_MAX = 10;
 % Update handles structure
 guidata(hObject, handles);
 
@@ -113,6 +114,3 @@ function init_param_Callback(hObject, eventdata, handles)
 init_param();
 pause(0.01);
 close(main);
-
-
-

@@ -22,7 +22,7 @@ function varargout = init_param(varargin)
 
 % Edit the above text to modify the response to help init_param
 
-% Last Modified by GUIDE v2.5 23-Sep-2017 10:10:19
+% Last Modified by GUIDE v2.5 23-Sep-2017 18:07:37
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,6 +54,7 @@ function init_param_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for init_param
 handles.output = hObject;
+global DIM_MAX; DIM_MAX = 10;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -75,14 +76,22 @@ varargout{1} = handles.output;
 
 function edit_x_dim_Callback(hObject, eventdata, handles)
 global dim_x;
+global dim_z
+global DIM_MAX;
 str = get(hObject,'string');
 val = str2double(str);
-if isnumeric(val) && ~isempty(val)
+if val > 1 && val < DIM_MAX
     dim_x = val;
     set(handles.edit_init_x,'string',num2str(zeros(1, dim_x)));
     set(handles.edit_init_p,'string',num2str(zeros(dim_x,dim_x)));
+    set(handles.edit_transition,'string',num2str(zeros(dim_x,dim_x)));
+    set(handles.edit_observe,'string',num2str(zeros(dim_z,dim_x)));
 else
-    return;
+    dim_x = 0;
+    set(handles.edit_init_x,'string','');
+    set(handles.edit_init_p,'string','');
+    set(handles.edit_transition,'string','');
+    set(handles.edit_observe,'string','');
 end
 
 function edit_x_dim_CreateFcn(hObject, eventdata, handles)
@@ -96,9 +105,17 @@ end
 
 function edit_dim_z_Callback(hObject, eventdata, handles)
 global dim_z;
+global dim_x;
+global DIM_MAX;
 str = get(hObject,'string');
 val = str2double(str);
-dim_z = val;
+if val > 1 && val < DIM_MAX
+    dim_z = val;
+    set(handles.edit_observe,'string',num2str(zeros(dim_z,dim_x)));
+else
+    dim_z = 0;
+    set(handles.edit_observe,'string','');
+end
 
 
 function edit_dim_z_CreateFcn(hObject, eventdata, handles)
@@ -198,8 +215,9 @@ function uibuttongroup_transition_CreateFcn(hObject, eventdata, handles)
 function uibuttongroup_transition_SelectionChangedFcn(hObject, eventdata, handles)
 global transition_style;
 global dim_x;
-%此处需要修改
-if isnumeric(dim_x) && ~isempty(dim_x)
+global DIM_MAX;
+%use the dim_x's num to judge if it is legal
+if (dim_x > 1) && (dim_x < DIM_MAX)
     switch get(hObject , 'tag')
         case 'radiobutton_transition_matrix'
             transition_style = 'matrix';
@@ -207,22 +225,27 @@ if isnumeric(dim_x) && ~isempty(dim_x)
             set(handles.edit_transition,'string',str);
         case 'radiobutton_trasition_formula'
             transition_style = 'formula';
+            set(handles.edit_transition,'string','');
         otherwise
             msgbox('选择状态转移方程时出错','Error','error');
     end
 else
-    return;
+   set(handles.edit_transition,'string','');
 end
 
 
 function uibuttongroup_observe_SelectionChangedFcn(hObject, eventdata, handles)
 global observe_style;
+global dim_x;
+global dim_z;
 switch get(hObject , 'tag')
     case 'radiobutton_observe_matrix'
         observe_style = 'matrix';
-        
+        str  = num2str(zeros(dim_z,dim_x));
+        set(handles.edit_observe,'string',str);
     case 'radiobutton_observe_formula'
         observe_style = 'formula';
+        set(handles.edit_observe,'string','');
     otherwise
             msgbox('选择观测方程时出错','Error','error');
 end
@@ -238,4 +261,3 @@ function radiobutton_observe_matrix_CreateFcn(hObject, eventdata, handles)
 set(hObject,'value',1);
 
 function radiobutton_observe_formula_CreateFcn(hObject, eventdata, handles)
-
