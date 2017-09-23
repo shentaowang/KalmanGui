@@ -218,8 +218,12 @@ main();
 pause(0.01);
 close(init_param);
 
+%the simplest
 function edit_transition_Callback(hObject, eventdata, handles)
-
+global init_f;
+str = get(hObject,'string');
+val = str2num(str);
+init_f = val;
 
 function edit_transition_CreateFcn(hObject, eventdata, handles)
 
@@ -229,8 +233,12 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
+%the simplest 
 function edit_observe_Callback(hObject, eventdata, handles)
+global init_h
+str = get(hObject,'string');
+val = str2num(str);
+init_h = val;
 
 
 function edit_observe_CreateFcn(hObject, eventdata, handles)
@@ -243,6 +251,7 @@ end
 
 
 function pushbutton_check_Callback(hObject, eventdata, handles)
+handles.state = 1;
 
 
 function uibuttongroup_transition_CreateFcn(hObject, eventdata, handles)

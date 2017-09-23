@@ -50,21 +50,54 @@ function main_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 %define the global variable
 %need to add the explain for variable
-global observe_data; observe_data = [];
-global compare_data; compare_data = [];
-global init_x; init_x = 0;
-global init_p; init_p = [];
-global init_q; init_q = [];
-global init_r; init_r = [];
-global init_f; init_f = 0;
-global init_h; init_h = 0;
-global dim_x; dim_x = 0;
-global dim_z; dim_z = 0;
-global sample_t; sample_t = 0;
-global transition_style; transition_style = 'matrix';
-global observe_style; observe_style = 'matrix';
+global observe_data;
+global compare_data;
+global init_x;
+global init_p;
+global init_q;
+global init_r;
+global init_f;
+global init_h;
+global dim_x;
+global dim_z;
+global sample_t;
+global transition_style;
+global observe_style;
+global islegal_param;
 global DIM_MAX; DIM_MAX = 10;
 global SAMPLE_T_MAX; SAMPLE_T_MAX = 10000;
+try 
+    if islegal_param == 0
+        observe_data = [];
+        compare_data = [];
+        init_x = 0;
+        init_p = [];
+        init_q = [];
+        init_r = [];
+        init_f = 0;
+        init_h = 0;
+        dim_x = 0;
+        dim_z = 0;
+        sample_t = 0;
+        transition_style = 'matrix';
+        observe_style = 'matrix';
+    end
+catch
+    islegal_param = 0;
+    observe_data = [];
+    compare_data = [];
+    init_x = 0;
+    init_p = [];
+    init_q = [];
+    init_r = [];
+    init_f = 0;
+    init_h = 0;
+    dim_x = 0;
+    dim_z = 0;
+    sample_t = 0;
+    transition_style = 'matrix';
+    observe_style = 'matrix';
+end
 % Update handles structure
 guidata(hObject, handles);
 
@@ -115,3 +148,4 @@ function init_param_Callback(hObject, eventdata, handles)
 init_param();
 pause(0.01);
 close(main);
+
