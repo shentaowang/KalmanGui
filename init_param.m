@@ -127,7 +127,7 @@ global dim_z
 global DIM_MAX;
 str = get(hObject,'string');
 val = str2double(str);
-is_inrange = val > 1 && val < DIM_MAX;
+is_inrange = val > 0 && val < DIM_MAX;
 is_integer = val == fix(val);
 if is_inrange && is_integer
     dim_x = val;
@@ -160,7 +160,7 @@ global dim_x;
 global DIM_MAX;
 str = get(hObject,'string');
 val = str2double(str);
-is_inrange = val > 1 && val < DIM_MAX;
+is_inrange = val > 0 && val < DIM_MAX;
 is_integer = val == fix(val);
 if is_inrange && is_integer
     dim_z = val;
@@ -344,7 +344,7 @@ function uibuttongroup_transition_SelectionChangedFcn(hObject, eventdata, handle
 global transition_style;
 global dim_x;
 global DIM_MAX;
-is_inrange = dim_x > 1 && dim_x < DIM_MAX;
+is_inrange = dim_x > 0 && dim_x < DIM_MAX;
 is_integer = dim_x == fix(dim_x);
 if is_inrange && is_integer
     switch get(hObject , 'tag')

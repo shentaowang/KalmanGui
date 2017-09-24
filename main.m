@@ -48,6 +48,9 @@ function main_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for main
 handles.output = hObject;
+%add the path
+root_path = '../KalmanGui';
+addpath(genpath(root_path));
 %define the global variable
 %need to add the explain for variable
 global observe_data;
@@ -163,6 +166,44 @@ close(main);
 
 
 function pushbutton_filter_Callback(hObject, eventdata, handles)
+global observe_data;
+global init_x;
+global init_p;
+global init_q;
+global init_r;
+global init_f;
+global init_h;
+global dim_x;
+global dim_z;
+global sample_t;
+global transition_style;
+global observe_style;
+global islegal_param;
+if ~islegal_param
+    msgbox('参数初始化不合法','Error','error');
+    return;
+end
+combine_style = strcat(transition_style,observe_style);
+switch combine_style
+    case 'matrixmatrix'
+        filtered_x = kalman_filter(init_x,observe_data,init_p,init_q,init_r,init_f,init_h);
+    case 'matrixformula'
+        msgbox('此功能未完成','Warn','warn');
+        islegal_param = 0;
+        return;
+    case 'formulamatrix'
+        msgbox('此功能未完成','Warn','warn');
+        islegal_param = 0;
+        return;
+    case 'formulaformula'
+        msgbox('此功能未完成','Warn','warn');
+        islegal_param = 0;
+        return;
+    otherwise
+        msgbox('选择矩阵形式或者方程形式','Error','error');
+        islegal_param = 0;
+        return;
+end
 
 
 function pushbutton_showwave_Callback(hObject, eventdata, handles)
