@@ -1,4 +1,10 @@
-matrixmatrix01.txt
+label
+matrixmatrix:mm
+matrixformula:mf
+formulamatrix:fm
+formulaformula:ff
+
+mm_observe_01.txt
 dim_x = 0
 dim_z = 0
 init_P = 1e-5;

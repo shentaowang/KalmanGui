@@ -55,6 +55,7 @@ addpath(genpath(root_path));
 %need to add the explain for variable
 global observe_data;
 global compare_data;
+global filtered_x;
 global init_x;
 global init_p;
 global init_q;
@@ -68,7 +69,9 @@ global transition_style;
 global observe_style;
 global islegal_param;
 global DIM_MAX; DIM_MAX = 10;
-global SAMPLE_T_MAX; SAMPLE_T_MAX = 10000; 
+global SAMPLE_T_MAX; SAMPLE_T_MAX = 10000;
+global dim_show;
+dim_show = 1;
 if isempty(islegal_param)
     islegal_param = 0;
     observe_data = [];
@@ -167,15 +170,13 @@ close(main);
 
 function pushbutton_filter_Callback(hObject, eventdata, handles)
 global observe_data;
+global filtered_x;
 global init_x;
 global init_p;
 global init_q;
 global init_r;
 global init_f;
 global init_h;
-global dim_x;
-global dim_z;
-global sample_t;
 global transition_style;
 global observe_style;
 global islegal_param;
@@ -187,8 +188,6 @@ combine_style = strcat(transition_style,observe_style);
 switch combine_style
     case 'matrixmatrix'
         filtered_x = kalman_filter(init_x,observe_data,init_p,init_q,init_r,init_f,init_h);
-        axes(handles.axes_showcompare);
-        plot(filtered_x);
     case 'matrixformula'
         msgbox('此功能未完成','Warn','warn');
         islegal_param = 0;
@@ -209,10 +208,16 @@ end
 
 
 function pushbutton_showwave_Callback(hObject, eventdata, handles)
-
-
+global dim_show
+global filtered_x;
+global islegal_param;
+if islegal_param
+    axes(handles.axes_showcompare);
+    plot(filtered_x(dim_show,:));
+end
 function popupmenu_showlist_Callback(hObject, eventdata, handles)
-
+global dim_show;
+dim_show = get(hObject,'Value');
 
 function popupmenu_showlist_CreateFcn(hObject, eventdata, handles)
 
@@ -221,6 +226,5 @@ function popupmenu_showlist_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 function axes_showcompare_CreateFcn(hObject, eventdata, handles)
