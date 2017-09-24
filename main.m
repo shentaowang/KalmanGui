@@ -156,10 +156,31 @@ while 1
 end
 
 
-    
-
 function import_compare_Callback(hObject, eventdata, handles)
+global compare_data;
+compare_data = [];
+[f_name, p_name] = uigetfile('*.txt');
+%if choose the cancle
+if isequal(p_name,0)
+    return;
+end
+full_name = fullfile(p_name, f_name);
 
+fp = fopen(full_name);
+while 1
+    tline = fgetl(fp);
+    if ~ischar(tline)
+        break;
+    end
+    tline = str2num(tline);
+    %check if the data is standard, but need more rule
+    if isempty(tline)
+        msgbox('Please input the standard data', 'Error', 'error');
+        compare_data = [];
+        return;
+    end
+    compare_data = [compare_data tline'];
+end
 
 
 function init_param_Callback(hObject, eventdata, handles)
@@ -210,11 +231,28 @@ end
 function pushbutton_showwave_Callback(hObject, eventdata, handles)
 global dim_show
 global filtered_x;
+global compare_data;
 global islegal_param;
+plot_x = 1:size(filtered_x,2);
+isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
+    size(filtered_x,1) && size(compare_data,2) == size(filtered_x,2));
+
 if islegal_param
-    axes(handles.axes_showcompare);
-    plot(filtered_x(dim_show,:));
+    if isnot_match
+        msgbox('滤波数据和比较数据不匹配，只显示滤波数据','Error','error');
+        compare_data = [];
+        axes(handles.axes_showcompare);
+        plot(plot_x,filtered_x(dim_show,:));
+    elseif isempty(compare_data)
+        axes(handles.axes_showcompare);
+        plot(plot_x,filtered_x(dim_show,:));
+    elseif ~isempty(compare_data)
+        axes(handles.axes_showcompare);
+        plot(plot_x,filtered_x(dim_show,:),plot_x,compare_data(dim_show,:));
+    end
 end
+
+
 function popupmenu_showlist_Callback(hObject, eventdata, handles)
 global dim_show;
 dim_show = get(hObject,'Value');
