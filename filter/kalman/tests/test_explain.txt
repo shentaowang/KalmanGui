@@ -1,0 +1,8 @@
+data01.txt
+dim_x = 0
+dim_z = 0
+init_P = 1e-5;
+init_H = 1;
+init_F = 1;
+init_R = 1e-5;
+init_Q = 1e-6;	

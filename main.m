@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 24-Sep-2017 09:23:00
+% Last Modified by GUIDE v2.5 24-Sep-2017 11:16:31
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -187,6 +187,8 @@ combine_style = strcat(transition_style,observe_style);
 switch combine_style
     case 'matrixmatrix'
         filtered_x = kalman_filter(init_x,observe_data,init_p,init_q,init_r,init_f,init_h);
+        axes(handles.axes_showcompare);
+        plot(filtered_x);
     case 'matrixformula'
         msgbox('此功能未完成','Warn','warn');
         islegal_param = 0;
@@ -219,3 +221,6 @@ function popupmenu_showlist_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+function axes_showcompare_CreateFcn(hObject, eventdata, handles)
