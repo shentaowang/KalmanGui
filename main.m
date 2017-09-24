@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 23-Sep-2017 10:52:13
+% Last Modified by GUIDE v2.5 24-Sep-2017 09:23:00
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -96,6 +96,20 @@ else
         observe_style = 'matrix';
     end
 end
+
+%init the wave we can choose
+show_list = [];
+str_prefix = 'ÏÔÊ¾x(';
+str_suffix = ')';
+if dim_x > 0
+    for k=1:dim_x
+        show_list = [show_list;strcat(str_prefix,num2str(k),str_suffix)];
+    end
+    show_list = mat2cell(show_list,size(show_list,1),size(show_list,2));
+    set(handles.popupmenu_showlist,'string',show_list{1,1},'value',1);
+end
+
+
 % Update handles structure
 guidata(hObject, handles);
 
@@ -147,3 +161,20 @@ init_param();
 pause(0.01);
 close(main);
 
+
+function pushbutton_filter_Callback(hObject, eventdata, handles)
+
+
+function pushbutton_showwave_Callback(hObject, eventdata, handles)
+
+
+function popupmenu_showlist_Callback(hObject, eventdata, handles)
+
+
+function popupmenu_showlist_CreateFcn(hObject, eventdata, handles)
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

@@ -80,7 +80,7 @@ if is_inrange && is_integer && ~islegal_param
 elseif is_inrange && is_integer && islegal_param
     set(handles.edit_dim_x,'string',num2str(dim_x));
     set(handles.edit_dim_z,'string',num2str(dim_z));
-    set(handles.edit_init_x,'string',num2str(init_x));
+    set(handles.edit_init_x,'string',num2str(init_x'));
     set(handles.edit_init_p,'string',num2str(init_p));
     set(handles.edit_transition,'string',num2str(init_f));
     set(handles.edit_observe,'string',num2str(init_h));
