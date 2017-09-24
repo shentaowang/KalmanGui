@@ -198,11 +198,17 @@ global init_q;
 global init_r;
 global init_f;
 global init_h;
+global dim_z;
 global transition_style;
 global observe_style;
 global islegal_param;
+is_match = size(observe_data,1) == dim_z;
 if ~islegal_param
     msgbox('参数初始化不合法','Error','error');
+    return;
+end
+if ~is_match
+    msgbox('模型和数据不匹配','Error','error');
     return;
 end
 combine_style = strcat(transition_style,observe_style);
