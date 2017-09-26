@@ -238,9 +238,9 @@ end
 
 
 function pushbutton_back_main_Callback(hObject, eventdata, handles)
-main();
-pause(0.01);
 close(init_param);
+main();
+
 
 %the simplest
 function edit_transition_Callback(hObject, eventdata, handles)

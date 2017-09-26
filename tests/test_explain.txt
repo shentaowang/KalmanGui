@@ -1,14 +1,38 @@
-label
+标签
 matrixmatrix:mm
 matrixformula:mf
 formulamatrix:fm
 formulaformula:ff
-
+_______________________________________
+文件类型说明
+xx_observe_xx:含噪声时观测变量数据
+xx_noise_xx:含噪声时状态变量值
+xx_true_xx:无噪声时状态变量值
+_______________________________________
 mm_observe_01.txt
-dim_x = 0
-dim_z = 0
+dim_x = 1
+dim_z = 1
 init_P = 1e-5;
 init_H = 1;
 init_F = 1;
 init_R = 1e-5;
 init_Q = 1e-6;
+init_x = 179
+
+_______________________________________
+mm_ovserve_02.txt
+dim_x = 4
+dim_z = 3
+init_P = eye(4)
+init_f = [
+    1 0 1 0;
+    0 1 0 1;
+    0 0 1 0;
+    0 0 0 1];
+init_h = [
+    1 0 1 0;
+    0 1 0 1;
+    0 0 0 1];
+init_Q = eye(4)
+init_R = eye(4)
+init_x = [200 200 300 400]

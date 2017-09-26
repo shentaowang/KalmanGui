@@ -184,10 +184,8 @@ end
 
 
 function init_param_Callback(hObject, eventdata, handles)
-init_param();
-pause(0.01);
 close(main);
-
+init_param();
 
 function pushbutton_filter_Callback(hObject, eventdata, handles)
 global observe_data;
@@ -243,18 +241,20 @@ plot_x = 1:size(filtered_x,2);
 isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
     size(filtered_x,1) && size(compare_data,2) == size(filtered_x,2));
 
-if islegal_param
+if islegal_param && ~isempty(filtered_x)
     if isnot_match
         msgbox('滤波数据和比较数据不匹配，只显示滤波数据','Error','error');
         compare_data = [];
         axes(handles.axes_showcompare);
         plot(plot_x,filtered_x(dim_show,:));
+        legend('滤波后数据');
     elseif isempty(compare_data)
         axes(handles.axes_showcompare);
         plot(plot_x,filtered_x(dim_show,:));
     elseif ~isempty(compare_data)
         axes(handles.axes_showcompare);
-        plot(plot_x,filtered_x(dim_show,:),plot_x,compare_data(dim_show,:));
+        plot(plot_x,filtered_x(dim_show,:),plot_x,compare_data(dim_show,:),'--');
+        legend('滤波后数据','比较数据')
     end
 end
 
