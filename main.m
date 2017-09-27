@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 24-Sep-2017 11:16:31
+% Last Modified by GUIDE v2.5 27-Sep-2017 11:20:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -272,3 +272,9 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 function axes_showcompare_CreateFcn(hObject, eventdata, handles)
+
+
+function output_filtered_Callback(hObject, eventdata, handles)
+
+
+function output_analyze_Callback(hObject, eventdata, handles)
