@@ -243,17 +243,23 @@ isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
 
 if islegal_param && ~isempty(filtered_x)
     if isnot_match
-        msgbox('滤波数据和比较数据不匹配，只显示滤波数据','Error','error');
         compare_data = [];
         axes(handles.axes_showcompare);
         plot(plot_x,filtered_x(dim_show,:));
+        xlabel('数据点');
+        ylabel('数据值');
         legend('滤波后数据');
+        msgbox('滤波数据和比较数据不匹配，只显示滤波数据','Error','error');
     elseif isempty(compare_data)
         axes(handles.axes_showcompare);
         plot(plot_x,filtered_x(dim_show,:));
+        xlabel('数据点');
+        ylabel('数据值');
     elseif ~isempty(compare_data)
         axes(handles.axes_showcompare);
         plot(plot_x,filtered_x(dim_show,:),plot_x,compare_data(dim_show,:),'--');
+        xlabel('数据点');
+        ylabel('数据值');
         legend('滤波后数据','比较数据')
     end
 end
@@ -275,6 +281,23 @@ function axes_showcompare_CreateFcn(hObject, eventdata, handles)
 
 
 function output_filtered_Callback(hObject, eventdata, handles)
+global filtered_x;
+[f_name p_name ] = uiputfile('*.txt');
+if isequal(p_name,0) || isequal(f_name,0)
+   return;
+end
+full_name = fullfile(p_name, f_name);
+fp = fopen(full_name,'w');
+dim_data = size(filtered_x,2);
+dim_x = size(filtered_x,1);
+
+output_data = filtered_x';
+for k=1:dim_data
+    for m=1:dim_x
+        fprintf(fp,'%6f\t',output_data(k,m));
+    end
+    fprintf(fp,'\r\n');
+end
 
 
 function output_analyze_Callback(hObject, eventdata, handles)
