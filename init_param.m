@@ -245,9 +245,24 @@ main();
 %the simplest
 function edit_transition_Callback(hObject, eventdata, handles)
 global init_f;
+global transition_style;
+global sample_t
+global dim_x
 str = get(hObject,'string');
+if strcmp(transition_style,'matrix')
+    for k=1:dim_x
+        if ~isempty(strfind(str(k,:),'t')) && sample_t==0
+            msgbox('请输入合法采样时间');
+            str = '';
+            break;
+        elseif ~isempty(strfind(str(k,:),'t')) && sample_t~=0
+            str(k,:) = strrep(str(k,:),'t',num2str(sample_t));
+        end
+    end
+end
 val = str2num(str);
 init_f = val;
+init_f
 
 function edit_transition_CreateFcn(hObject, eventdata, handles)
 
@@ -260,9 +275,24 @@ end
 %the simplest 
 function edit_observe_Callback(hObject, eventdata, handles)
 global init_h
+global dim_z
+global observe_style
+global sample_t
 str = get(hObject,'string');
+if strcmp(observe_style,'matrix')
+    for k=1:dim_z
+        if ~isempty(strfind(str(k,:),'t')) && sample_t==0
+            msgbox('请输入合法采样时间');
+            str = '';
+            break;
+        elseif ~isempty(strfind(str(k,:),'t')) && sample_t~=0
+            str(k,:) = strrep(str(k,:),'t',num2str(sample_t));
+        end
+    end
+end
 val = str2num(str);
 init_h = val;
+init_h
 
 
 function edit_observe_CreateFcn(hObject, eventdata, handles)
