@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 27-Sep-2017 11:20:43
+% Last Modified by GUIDE v2.5 02-Oct-2017 16:33:47
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -197,6 +197,7 @@ global init_r;
 global init_f;
 global init_h;
 global dim_z;
+global dim_x;
 global transition_style;
 global observe_style;
 global islegal_param;
@@ -222,6 +223,15 @@ switch combine_style
         islegal_param = 0;
         return;
     case 'formulaformula'
+        dim_data = size(observe_data,2);
+        filtering_data = zeros(dim_x,dim_data);
+        x = init_x;
+        p = init_p;
+        for k =1:dim_data
+            z = observe_data(:,k);
+            [x, p] = unscented_kalman_filter(init_f,x,p,init_h,z,init_q,init_r);
+            filtering_data(:,k) = x;
+        end
         msgbox('此功能未完成','Warn','warn');
         islegal_param = 0;
         return;
@@ -298,6 +308,3 @@ for k=1:dim_data
     end
     fprintf(fp,'\r\n');
 end
-
-
-function output_analyze_Callback(hObject, eventdata, handles)

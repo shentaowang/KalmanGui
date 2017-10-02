@@ -22,7 +22,7 @@ function varargout = init_param(varargin)
 
 % Edit the above text to modify the response to help init_param
 
-% Last Modified by GUIDE v2.5 23-Sep-2017 20:16:00
+% Last Modified by GUIDE v2.5 02-Oct-2017 17:31:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -66,6 +66,8 @@ global dim_x;
 global dim_z;
 global sample_t;
 global islegal_param;
+global transition_style;
+global observe_style;
 is_inrange = dim_x > 0 && dim_x < DIM_MAX && dim_z > 0 && dim_z < DIM_MAX;
 is_integer = (dim_x == fix(dim_x)) && (dim_z == fix(dim_z));
 if is_inrange && is_integer && ~islegal_param
@@ -82,8 +84,16 @@ elseif is_inrange && is_integer && islegal_param
     set(handles.edit_dim_z,'string',num2str(dim_z));
     set(handles.edit_init_x,'string',num2str(init_x'));
     set(handles.edit_init_p,'string',num2str(init_p));
-    set(handles.edit_transition,'string',num2str(init_f));
-    set(handles.edit_observe,'string',num2str(init_h));
+    if strcmp(transition_style,'matrix')
+        set(handles.edit_transition,'string',num2str(init_f));
+    else
+        set(handles.edit_transition,'string',func2str(init_f));
+    end
+    if strcmp(observe_style,'matrix')
+        set(handles.edit_observe,'string',num2str(init_h));
+    else
+        set(handles.edit_observe,'string',func2str(init_h));
+    end
     set(handles.edit_init_q,'string',num2str(init_q));
     set(handles.edit_init_r,'string',num2str(init_r));
 else
@@ -251,19 +261,22 @@ global dim_x
 str = get(hObject,'string');
 if strcmp(transition_style,'matrix')
     for k=1:dim_x
-        if ~isempty(strfind(str(k,:),'t')) && sample_t==0
-            msgbox('请输入合法采样时间');
-            str = '';
-            break;
-        elseif ~isempty(strfind(str(k,:),'t')) && sample_t~=0
-            str(k,:) = strrep(str(k,:),'t',num2str(sample_t));
+        if ~isempty(strfind(str(k,:),'sat')) && sample_t==0
+            msgbox('请输入合法采样时间','Error','error');
+            return;
+        elseif ~isempty(strfind(str(k,:),'sat')) && sample_t~=0
+            str(k,:) = strrep(str(k,:),'sat',num2str(sample_t/1000));
         end
     end
     val = str2num(str);
     init_f = val;
 else
-    str = strrep(str,'t',num2str(sample_t));
-    init_f = str2func(['@(x)',str]);
+    if ~isempty(strfind(str,'sat')) && sample_t==0
+        msgbox('请输入合法采样时间','Error','error');
+        return;
+    end
+    str = strrep(str,'sat',num2str(sample_t/1000));
+    init_f = str2func(str);
 end
 
 function edit_transition_CreateFcn(hObject, eventdata, handles)
@@ -283,19 +296,22 @@ global sample_t
 str = get(hObject,'string');
 if strcmp(observe_style,'matrix')
     for k=1:dim_z
-        if ~isempty(strfind(str(k,:),'t')) && sample_t==0
-            msgbox('请输入合法采样时间');
-            str = '';
-            break;
-        elseif ~isempty(strfind(str(k,:),'t')) && sample_t~=0
-            str(k,:) = strrep(str(k,:),'t',num2str(sample_t));
+        if ~isempty(strfind(str(k,:),'sat')) && sample_t==0
+            msgbox('请输入合法采样时间','Error','error');
+            return;
+        elseif ~isempty(strfind(str(k,:),'sat')) && sample_t~=0
+            str(k,:) = strrep(str(k,:),'sat',num2str(sample_t/1000));
         end
     end
     val = str2num(str);
     init_h = val;
 else
-    str = strrep(str,'t',num2str(sample_t));
-    init_h = str2func(['@(x)',str]);
+    if ~isempty(strfind(str,'sat')) && sample_t==0
+        msgbox('请输入合法采样时间','Error','error');
+        return;
+    end
+    str = strrep(str,'sat',num2str(sample_t/1000));
+    init_h = str2func(str);
 end
 
 
@@ -311,67 +327,33 @@ end
 function pushbutton_check_Callback(hObject, eventdata, handles)
 global islegal_param;
 global init_x;
-global init_p;
-global init_q;
-global init_r;
-global init_f;
-global init_h;
 global dim_x;
 global dim_z;
-global sample_t;
-global transition_style;
-global observe_style;
 global DIM_MAX;
-global SAMPLE_T_MAX;
-combine_style = strcat(transition_style,observe_style);
-switch combine_style
-    case 'matrixmatrix'
-        is_inrange = dim_x > 0 && dim_x < DIM_MAX && dim_z > 0 &&...
-            dim_z < DIM_MAX;
-        is_integer = dim_x == fix(dim_x) && dim_z == fix(dim_z);
-        combine_dim1 = size(init_p,1) * size(init_q,1) * size(init_r,1) *...
-            size(init_f,1) * size(init_h,1) * size(init_x,1);
-        combine_dim2 = size(init_p,2) * size(init_q,2) * size(init_r,2) *...
-            size(init_f,2) * size(init_h,2) * size(init_x,2);
-        is_matrix_true  = combine_dim1==(dim_x^4 * dim_z^2) &&...
-            combine_dim2==(dim_x^4 * dim_z);
-        if ~is_inrange
-            msgbox('输入参数维度和采样时间超过范围','Error','error');
-            islegal_param = 0;
-            return;
-        end
-        if ~is_integer
-            msgbox('输入参数维度为非整数','Error','error');
-            islegal_param = 0;
-            return;
-        end
-        if ~is_matrix_true
-            msgbox('参数未全部初始化或者初始化有误','Error','error');
-            islegal_param = 0;
-            return;
-        end
-    case 'matrixformula'
-        msgbox('此功能未完成','Warn','warn');
-        islegal_param = 0;
-        return;
-    case 'formulamatrix'
-        msgbox('此功能未完成','Warn','warn');
-        islegal_param = 0;
-        return;
-    case 'formulaformula'
-        msgbox('此功能未完成','Warn','warn');
-        islegal_param = 0;
-        return;
-    otherwise
-        msgbox('选择矩阵形式或者方程形式','Error','error');
-        islegal_param = 0;
-        return;
+is_inrange = dim_x > 0 && dim_x < DIM_MAX && dim_z > 0 &&...
+    dim_z < DIM_MAX;
+is_integer = dim_x == fix(dim_x) && dim_z == fix(dim_z);
+if ~is_inrange
+    msgbox('输入参数维度和采样时间超过范围','Error','error');
+    islegal_param = 0;
+    return;
+end
+if ~is_integer
+    msgbox('输入参数维度为非整数','Error','error');
+    islegal_param = 0;
+    return;
+end
+if ~check_matrix()
+    islegal_param = 0;
+    return;
 end
 msgbox('初始化完成','Success');
 islegal_param = 1;
 
 
 function uibuttongroup_transition_CreateFcn(hObject, eventdata, handles)
+
+function uibuttongroup_observe_CreateFcn(hObject, eventdata, handles)
 
 
 function uibuttongroup_transition_SelectionChangedFcn(hObject, eventdata, handles)
@@ -422,16 +404,29 @@ end
 
 
 function radiobutton_transition_matrix_CreateFcn(hObject, eventdata, handles)
-set(hObject,'value',1);
+global transition_style;
+if strcmp(transition_style,'matrix')
+    set(hObject,'value',1);
+end
 
+function radiobutton_trasition_formula_CreateFcn(hObject, eventdata, handles)
+global transition_style;
+if strcmp(transition_style,'formula')
+    set(hObject,'value',1);
+end
 
-function uibuttongroup_observe_CreateFcn(hObject, eventdata, handles)
 
 function radiobutton_observe_matrix_CreateFcn(hObject, eventdata, handles)
-set(hObject,'value',1);
+global observe_style;
+if strcmp(observe_style,'matrix')
+    set(hObject,'value',1);
+end
 
 function radiobutton_observe_formula_CreateFcn(hObject, eventdata, handles)
-
+global observe_style;
+if strcmp(observe_style,'formula')
+    set(hObject,'value',1);
+end
 
 function edit_init_q_Callback(hObject, eventdata, handles)
 global init_q;
@@ -463,3 +458,78 @@ function edit_init_r_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+function is_matrix_legal = check_matrix()
+global dim_x;
+global dim_z;
+global init_x;
+global init_p;
+global init_q;
+global init_r;
+global init_f;
+global init_h;
+global transition_style
+global observe_style
+if ~(size(init_x,1) == dim_x && size(init_x,2)==1)
+    msgbox('状态变量x的初始化错误','Error','error');
+    is_matrix_legal = 0;
+    return;
+end
+if ~(size(init_p,1) == dim_x && size(init_p,2)==dim_x)
+    msgbox('P的初始化错误','Error','error');
+    is_matrix_legal = 0;
+    return;
+end
+if ~(size(init_q,1) == dim_x && size(init_q,2)==dim_x)
+    msgbox('Q的初始化错误','Error','error');
+    is_matrix_legal = 0;
+    return;
+end
+if ~(size(init_r,1) == dim_z && size(init_r,2)==dim_z)
+    msgbox('R的初始化错误','Error','error');
+    is_matrix_legal = 0;
+    return;
+end
+if strcmp(transition_style,'matrix')
+    if ~(size(init_f,1) == dim_x&&size(init_f,2) == dim_x)
+        msgbox('状态转移方程的初始化错误','Error','error');
+        is_matrix_legal = 0;
+        return;
+    end
+else
+    try
+        res = init_f(ones(dim_x,1));
+        if size(res,1) ~= dim_x
+            msgbox('状态转移方程的初始化错误','Error','error');
+            is_matrix_legal = 0;
+            return;
+        end
+    catch
+        msgbox('状态转移方程的初始化错误','Error','error');
+        is_matrix_legal = 0;
+        return;
+    end
+end
+
+if strcmp(observe_style,'matrix')
+    if ~(size(init_h,1) == dim_z&&size(init_h,2) == dim_x)
+        msgbox('观测方程的初始化错误','Error','error');
+        is_matrix_legal = 0;
+        return;
+    end
+else
+    try
+        res = init_h(ones(dim_x,1));
+        if size(res,1) ~= dim_z
+            msgbox('观测方程的初始化错误','Error','error');
+            is_matrix_legal = 0;
+            return;
+        end
+    catch
+        msgbox('观测方程的初始化错误','Error','error');
+        is_matrix_legal = 0;
+        return;
+    end
+end
+is_matrix_legal = 1;
+
