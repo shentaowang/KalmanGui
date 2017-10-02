@@ -259,10 +259,12 @@ if strcmp(transition_style,'matrix')
             str(k,:) = strrep(str(k,:),'t',num2str(sample_t));
         end
     end
+    val = str2num(str);
+    init_f = val;
+else
+    str = strrep(str,'t',num2str(sample_t));
+    init_f = str2func(['@(x)',str]);
 end
-val = str2num(str);
-init_f = val;
-init_f
 
 function edit_transition_CreateFcn(hObject, eventdata, handles)
 
@@ -289,10 +291,12 @@ if strcmp(observe_style,'matrix')
             str(k,:) = strrep(str(k,:),'t',num2str(sample_t));
         end
     end
+    val = str2num(str);
+    init_h = val;
+else
+    str = strrep(str,'t',num2str(sample_t));
+    init_h = str2func(['@(x)',str]);
 end
-val = str2num(str);
-init_h = val;
-init_h
 
 
 function edit_observe_CreateFcn(hObject, eventdata, handles)
