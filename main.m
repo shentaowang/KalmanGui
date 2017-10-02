@@ -225,16 +225,19 @@ switch combine_style
     case 'formulaformula'
         dim_data = size(observe_data,2);
         filtering_data = zeros(dim_x,dim_data);
-        x = init_x;
-        p = init_p;
+        fstate = init_f;
+        hmeas = init_h;
+        mP = init_p;
+        mQ = init_q;
+        mR = init_r;
+        vX = init_x;
+        mP = init_p;
         for k =1:dim_data
-            z = observe_data(:,k);
-            [x, p] = unscented_kalman_filter(init_f,x,p,init_h,z,init_q,init_r);
-            filtering_data(:,k) = x;
+            vZ = observe_data(:,k);
+            [vX, mP] = unscented_kalman_filter(fstate,vX,mP,hmeas,vZ,mQ,mR);
+            filtering_data(:,k) = vX;
         end
-        msgbox('此功能未完成','Warn','warn');
-        islegal_param = 0;
-        return;
+        filtered_x = filtering_data;
     otherwise
         msgbox('选择矩阵形式或者方程形式','Error','error');
         islegal_param = 0;
@@ -259,7 +262,7 @@ if islegal_param && ~isempty(filtered_x)
         xlabel('数据点');
         ylabel('数据值');
         legend('滤波后数据');
-        msgbox('滤波数据和比较数据不匹配，只显示滤波数据','Error','error');
+        msgbox('滤波后数据和比较数据不匹配，只显示滤波数据','Error','error');
     elseif isempty(compare_data)
         axes(handles.axes_showcompare);
         plot(plot_x,filtered_x(dim_show,:));
