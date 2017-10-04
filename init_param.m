@@ -471,22 +471,43 @@ global init_h;
 global transition_style
 global observe_style
 if ~(size(init_x,1) == dim_x && size(init_x,2)==1)
-    msgbox('状态变量x的初始化错误','Error','error');
+    msgbox('状态变量x的维度不匹配','Error','error');
     is_matrix_legal = 0;
     return;
 end
 if ~(size(init_p,1) == dim_x && size(init_p,2)==dim_x)
-    msgbox('P的初始化错误','Error','error');
+    msgbox('P的初始化维度不匹配','Error','error');
     is_matrix_legal = 0;
     return;
 end
+if ~isequal(init_p,init_p')
+    msgbox('P不是对称矩阵','Error','error');
+    is_matrix_legal = 0;
+    return;
+end
+try chol(init_p)
+catch
+    msgbox('P不是正定矩阵','Error','error');
+    is_matrix_legal = 0;
+    return;
+end    
 if ~(size(init_q,1) == dim_x && size(init_q,2)==dim_x)
-    msgbox('Q的初始化错误','Error','error');
+    msgbox('Q的初始化维度不匹配','Error','error');
+    is_matrix_legal = 0;
+    return;
+end
+if ~isequal(init_q,init_q')
+    msgbox('Q不是对称矩阵','Error','error');
     is_matrix_legal = 0;
     return;
 end
 if ~(size(init_r,1) == dim_z && size(init_r,2)==dim_z)
-    msgbox('R的初始化错误','Error','error');
+    msgbox('R的初始化维度不匹配','Error','error');
+    is_matrix_legal = 0;
+    return;
+end
+if ~isequal(init_r,init_r')
+    msgbox('R不是对称矩阵','Error','error');
     is_matrix_legal = 0;
     return;
 end
