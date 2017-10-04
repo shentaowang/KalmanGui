@@ -201,13 +201,37 @@ switch combine_style
     case 'matrixmatrix'
         filtered_x = kalman_filter(init_x,observe_data,init_p,init_q,init_r,init_f,init_h);
     case 'matrixformula'
-        msgbox('此功能未完成','Warn','warn');
-        islegal_param = 0;
-        return;
+        dim_data = size(observe_data,2);
+        filtering_data = zeros(dim_x,dim_data);
+        fstate = @(x)init_f*x;
+        hmeas = init_h;
+        mP = init_p;
+        mQ = init_q;
+        mR = init_r;
+        vX = init_x;
+        mP = init_p;
+        for k =1:dim_data
+            vZ = observe_data(:,k);
+            [vX, mP] = unscented_kalman_filter(fstate,vX,mP,hmeas,vZ,mQ,mR);
+            filtering_data(:,k) = vX;
+        end
+        filtered_x = filtering_data;
     case 'formulamatrix'
-        msgbox('此功能未完成','Warn','warn');
-        islegal_param = 0;
-        return;
+ dim_data = size(observe_data,2);
+        filtering_data = zeros(dim_x,dim_data);
+        fstate = init_f;
+        hmeas = @(x)init_h*x;
+        mP = init_p;
+        mQ = init_q;
+        mR = init_r;
+        vX = init_x;
+        mP = init_p;
+        for k =1:dim_data
+            vZ = observe_data(:,k);
+            [vX, mP] = unscented_kalman_filter(fstate,vX,mP,hmeas,vZ,mQ,mR);
+            filtering_data(:,k) = vX;
+        end
+        filtered_x = filtering_data;
     case 'formulaformula'
         dim_data = size(observe_data,2);
         filtering_data = zeros(dim_x,dim_data);
@@ -287,7 +311,7 @@ if islegal_param && ~isempty(filtered_x)
             plot(plot_x,trans_filtered_x(dim_show,:),plot_x,observe_data(dim_show,:),'--');
             xlabel('数据点');
             ylabel('数据值');
-            legend('滤波后数据','观察数据');
+            legend('滤波后数据','观测数据');
     end
 end
 

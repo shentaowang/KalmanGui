@@ -260,15 +260,18 @@ global sample_t
 global dim_x
 str = get(hObject,'string');
 if strcmp(transition_style,'matrix')
+    trans_str = '';
     for k=1:dim_x
         if ~isempty(strfind(str(k,:),'sat')) && sample_t==0
             msgbox('请输入合法采样时间','Error','error');
             return;
         elseif ~isempty(strfind(str(k,:),'sat')) && sample_t~=0
-            str(k,:) = strrep(str(k,:),'sat',num2str(sample_t/1000));
+           trans_str  = char(trans_str,strrep(str(k,:),'sat',num2str(sample_t/1000)));
+        else
+            trans_str  = char(trans_str,str(k,:));
         end
     end
-    val = str2num(str);
+    val = str2num(trans_str);
     init_f = val;
 else
     if ~isempty(strfind(str,'sat')) && sample_t==0
