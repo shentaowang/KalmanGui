@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 02-Oct-2017 16:33:47
+% Last Modified by GUIDE v2.5 04-Oct-2017 15:11:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -102,20 +102,6 @@ else
         observe_style = 'matrix';
     end
 end
-
-%init the wave we can choose
-show_list = [];
-str_prefix = '显示x(';
-str_suffix = ')';
-if dim_x > 0
-    for k=1:dim_x
-        show_list = [show_list;strcat(str_prefix,num2str(k),str_suffix)];
-    end
-    show_list = mat2cell(show_list,size(show_list,1),size(show_list,2));
-    set(handles.popupmenu_showlist,'string',show_list{1,1},'value',1);
-end
-
-
 % Update handles structure
 guidata(hObject, handles);
 
@@ -246,41 +232,67 @@ end
 
 
 function pushbutton_showwave_Callback(hObject, eventdata, handles)
-global dim_show
+global dim_z;
 global filtered_x;
+global observe_data;
 global compare_data;
 global islegal_param;
-plot_x = 1:size(filtered_x,2);
-isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
-    size(filtered_x,1) && size(compare_data,2) == size(filtered_x,2));
-
+global init_h;
+global observe_style;
+dim_show = get(handles.popupmenu_showlist,'value');
 if islegal_param && ~isempty(filtered_x)
-    if isnot_match
-        compare_data = [];
-        axes(handles.axes_showcompare);
-        plot(plot_x,filtered_x(dim_show,:));
-        xlabel('数据点');
-        ylabel('数据值');
-        legend('滤波后数据');
-        msgbox('滤波后数据和比较数据不匹配，只显示滤波数据','Error','error');
-    elseif isempty(compare_data)
-        axes(handles.axes_showcompare);
-        plot(plot_x,filtered_x(dim_show,:));
-        xlabel('数据点');
-        ylabel('数据值');
-    elseif ~isempty(compare_data)
-        axes(handles.axes_showcompare);
-        plot(plot_x,filtered_x(dim_show,:),plot_x,compare_data(dim_show,:),'--');
-        xlabel('数据点');
-        ylabel('数据值');
-        legend('滤波后数据','比较数据')
+    sel = get(handles.popupmenu_showmethod,'value');
+    switch sel
+        case 1
+            plot_x = 1:size(filtered_x,2);
+            axes(handles.axes_showcompare);
+            plot(plot_x,filtered_x(dim_show,:));
+            xlabel('数据点');
+            ylabel('数据值');
+        case 2
+            plot_x = 1:size(filtered_x,2);
+            isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
+                size(filtered_x,1) && size(compare_data,2) == size(filtered_x,2));
+            if isempty(compare_data)
+                compare_data = [];
+                axes(handles.axes_showcompare);
+                plot(plot_x,filtered_x(dim_show,:));
+                xlabel('数据点');
+                ylabel('数据值');
+                legend('滤波后数据');
+                msgbox('真实数据未输入，只显示滤波数据','Error','error');
+            elseif isnot_match
+                axes(handles.axes_showcompare);
+                plot(plot_x,filtered_x(dim_show,:));
+                xlabel('数据点');
+                ylabel('数据值');
+                msgbox('滤波后数据和真实数据不匹配','Error','error');
+            elseif ~isempty(compare_data)
+                axes(handles.axes_showcompare);
+                plot(plot_x,filtered_x(dim_show,:),plot_x,compare_data(dim_show,:),'--');
+                xlabel('数据点');
+                ylabel('数据值');
+                legend('滤波后数据','真实数据')
+            end
+        case 3
+            if strcmp(observe_style,'matrix')
+                trans_filtered_x = init_h * filtered_x;
+            else
+                trans_filtered_x = zeros(dim_z,size(filtered_x,2));
+                for k = 1:size(trans_filtered_x,2)
+                    trans_filtered_x(:,k) = init_h(filtered_x(:,k));
+                end
+            end
+            plot_x = 1:size(filtered_x,2);
+            plot(plot_x,trans_filtered_x(dim_show,:),plot_x,observe_data(dim_show,:),'--');
+            xlabel('数据点');
+            ylabel('数据值');
+            legend('滤波后数据','观察数据');
     end
 end
 
 
 function popupmenu_showlist_Callback(hObject, eventdata, handles)
-global dim_show;
-dim_show = get(hObject,'Value');
 
 function popupmenu_showlist_CreateFcn(hObject, eventdata, handles)
 
@@ -289,8 +301,25 @@ function popupmenu_showlist_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+global islegal_param;
+global dim_x;
+%init the wave we can choose
+show_list = [];
+str_prefix = '显示x(';
+str_suffix = ')';
+if islegal_param
+    if dim_x > 0
+        for k=1:dim_x
+            show_list = [show_list;strcat(str_prefix,num2str(k),str_suffix)];
+        end
+        show_list = mat2cell(show_list,size(show_list,1),size(show_list,2));
+        set(hObject,'string',show_list{1,1},'value',1);
+    end
+end
 
 function axes_showcompare_CreateFcn(hObject, eventdata, handles)
+
+function output_analyze_Callback(hObject, eventdata, handles)
 
 
 function output_filtered_Callback(hObject, eventdata, handles)
@@ -310,4 +339,64 @@ for k=1:dim_data
         fprintf(fp,'%6f\t',output_data(k,m));
     end
     fprintf(fp,'\r\n');
+end
+
+
+function popupmenu_showmethod_Callback(hObject, eventdata, handles)
+global islegal_param;
+global dim_x;
+global dim_z;
+if islegal_param
+    sel = get(hObject,'value');
+    switch sel
+        case 1%select only show the filtered data
+            show_list = [];
+            str_prefix = '显示x(';
+            str_suffix = ')';
+            if dim_x > 0
+                for k=1:dim_x
+                    show_list = [show_list;strcat(str_prefix,num2str(k),str_suffix)];
+                end
+                show_list = mat2cell(show_list,size(show_list,1),size(show_list,2));
+                set(handles.popupmenu_showlist,'string',show_list{1,1},'value',1);
+            end
+        case 2 %select show the filtered data and ground truth data
+            show_list = [];
+            str_prefix = '显示x(';
+            str_suffix = ')';
+            if dim_x > 0
+                for k=1:dim_x
+                    show_list = [show_list;strcat(str_prefix,num2str(k),str_suffix)];
+                end
+                show_list = mat2cell(show_list,size(show_list,1),size(show_list,2));
+                set(handles.popupmenu_showlist,'string',show_list{1,1},'value',1);
+            end
+        case 3 %select show the filtered data and observe data
+            show_list = [];
+            str_prefix = '显示z(';
+            str_suffix = ')';
+            if dim_z > 0
+                for k=1:dim_z
+                    show_list = [show_list;strcat(str_prefix,num2str(k),str_suffix)];
+                end
+                show_list = mat2cell(show_list,size(show_list,1),size(show_list,2));
+                set(handles.popupmenu_showlist,'string',show_list{1,1},'value',1);
+            end
+    end
+end
+
+
+function popupmenu_showmethod_CreateFcn(hObject, eventdata, handles)
+global islegal_param;
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+if islegal_param
+    str1 = '单独显示滤波后数据';
+    str2 = '滤波后数据和真实数据(dim_x维)';
+    str3 = '滤波后数据和观测数据(dim_z维)';
+    show_list = {str1;str2;str3};
+    set(hObject,'string',show_list,'value',1);
 end

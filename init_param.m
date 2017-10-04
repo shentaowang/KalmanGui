@@ -22,7 +22,7 @@ function varargout = init_param(varargin)
 
 % Edit the above text to modify the response to help init_param
 
-% Last Modified by GUIDE v2.5 02-Oct-2017 17:31:08
+% Last Modified by GUIDE v2.5 04-Oct-2017 16:41:06
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -53,7 +53,6 @@ function init_param_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to init_param (see VARARGIN)
 
 % Choose default command line output for init_param
-handles.output = hObject;
 global DIM_MAX; DIM_MAX = 10;
 global SAMPLE_T_MAX; SAMPLE_T_MAX = 10000;
 global init_x;
@@ -114,6 +113,7 @@ else
     set(handles.edit_sample_time,'string','');
 end
 % Update handles structure
+handles.output = hObject;
 guidata(hObject, handles);
 
 % UIWAIT makes init_param wait for user response (see UIRESUME)
@@ -356,6 +356,7 @@ function uibuttongroup_transition_CreateFcn(hObject, eventdata, handles)
 function uibuttongroup_observe_CreateFcn(hObject, eventdata, handles)
 
 
+
 function uibuttongroup_transition_SelectionChangedFcn(hObject, eventdata, handles)
 global transition_style;
 global dim_x;
@@ -459,7 +460,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-function is_matrix_legal = check_matrix()
+function islegal_matrix = check_matrix()
 global dim_x;
 global dim_z;
 global init_x;
@@ -472,49 +473,49 @@ global transition_style
 global observe_style
 if ~(size(init_x,1) == dim_x && size(init_x,2)==1)
     msgbox('状态变量x的维度不匹配','Error','error');
-    is_matrix_legal = 0;
+    islegal_matrix = 0;
     return;
 end
 if ~(size(init_p,1) == dim_x && size(init_p,2)==dim_x)
     msgbox('P的初始化维度不匹配','Error','error');
-    is_matrix_legal = 0;
+    islegal_matrix = 0;
     return;
 end
 if ~isequal(init_p,init_p')
     msgbox('P不是对称矩阵','Error','error');
-    is_matrix_legal = 0;
+    islegal_matrix = 0;
     return;
 end
-try chol(init_p)
+try chol(init_p);
 catch
     msgbox('P不是正定矩阵','Error','error');
-    is_matrix_legal = 0;
+    islegal_matrix = 0;
     return;
 end    
 if ~(size(init_q,1) == dim_x && size(init_q,2)==dim_x)
     msgbox('Q的初始化维度不匹配','Error','error');
-    is_matrix_legal = 0;
+    islegal_matrix = 0;
     return;
 end
 if ~isequal(init_q,init_q')
     msgbox('Q不是对称矩阵','Error','error');
-    is_matrix_legal = 0;
+    islegal_matrix = 0;
     return;
 end
 if ~(size(init_r,1) == dim_z && size(init_r,2)==dim_z)
     msgbox('R的初始化维度不匹配','Error','error');
-    is_matrix_legal = 0;
+    islegal_matrix = 0;
     return;
 end
 if ~isequal(init_r,init_r')
     msgbox('R不是对称矩阵','Error','error');
-    is_matrix_legal = 0;
+    islegal_matrix = 0;
     return;
 end
 if strcmp(transition_style,'matrix')
     if ~(size(init_f,1) == dim_x&&size(init_f,2) == dim_x)
         msgbox('状态转移方程的初始化错误','Error','error');
-        is_matrix_legal = 0;
+        islegal_matrix = 0;
         return;
     end
 else
@@ -522,12 +523,12 @@ else
         res = init_f(ones(dim_x,1));
         if size(res,1) ~= dim_x
             msgbox('状态转移方程的初始化错误','Error','error');
-            is_matrix_legal = 0;
+            islegal_matrix = 0;
             return;
         end
     catch
         msgbox('状态转移方程的初始化错误','Error','error');
-        is_matrix_legal = 0;
+        islegal_matrix = 0;
         return;
     end
 end
@@ -535,7 +536,7 @@ end
 if strcmp(observe_style,'matrix')
     if ~(size(init_h,1) == dim_z&&size(init_h,2) == dim_x)
         msgbox('观测方程的初始化错误','Error','error');
-        is_matrix_legal = 0;
+        islegal_matrix = 0;
         return;
     end
 else
@@ -543,14 +544,20 @@ else
         res = init_h(ones(dim_x,1));
         if size(res,1) ~= dim_z
             msgbox('观测方程的初始化错误','Error','error');
-            is_matrix_legal = 0;
+            islegal_matrix = 0;
             return;
         end
     catch
         msgbox('观测方程的初始化错误','Error','error');
-        is_matrix_legal = 0;
+        islegal_matrix = 0;
         return;
     end
 end
-is_matrix_legal = 1;
+islegal_matrix = 1;
+
+
+
+function radiobutton_observe_matrix_Callback(hObject, eventdata, handles)
+
+function radiobutton_transition_matrix_Callback(hObject, eventdata, handles)
 
