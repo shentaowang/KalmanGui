@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 04-Oct-2017 15:11:43
+% Last Modified by GUIDE v2.5 08-Oct-2017 16:18:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -294,9 +294,15 @@ if islegal_param && ~isempty(filtered_x)
             elseif ~isempty(compare_data)
                 axes(handles.axes_showcompare);
                 plot(plot_x,filtered_x(dim_show,:),plot_x,compare_data(dim_show,:),'--');
+                data_gap = filtered_x(dim_show,:)-compare_data(dim_show,:);
+                mse = sum(data_gap.*data_gap)/size(compare_data,2);
+                str_mse = ['MSE:',num2str(mse)];
                 xlabel('数据点');
                 ylabel('数据值');
-                legend('滤波后数据','真实数据')
+                legend('滤波后数据','真实数据');
+                x_lim = get(handles.axes_showcompare,'XLim');
+                y_lim = get(handles.axes_showcompare,'YLim');
+                text(x_lim(2)*0.5,y_lim(2)*0.8,str_mse);
             end
         case 3
             if strcmp(observe_style,'matrix')
@@ -309,9 +315,15 @@ if islegal_param && ~isempty(filtered_x)
             end
             plot_x = 1:size(filtered_x,2);
             plot(plot_x,trans_filtered_x(dim_show,:),plot_x,observe_data(dim_show,:),'--');
+            data_gap = trans_filtered_x(dim_show,:)-observe_data(dim_show,:);
+            mse = sum(data_gap.*data_gap)/size(observe_data,2);
+            str_mse = ['MSE:',num2str(mse)];
             xlabel('数据点');
             ylabel('数据值');
             legend('滤波后数据','观测数据');
+            x_lim = get(handles.axes_showcompare,'XLim');
+            y_lim = get(handles.axes_showcompare,'YLim');
+            text(x_lim(2)*0.5,y_lim(2)*0.8,str_mse);
     end
 end
 
@@ -344,11 +356,40 @@ end
 function axes_showcompare_CreateFcn(hObject, eventdata, handles)
 
 function output_analyze_Callback(hObject, eventdata, handles)
+global filtered_x;
+global observe_data;
+global compare_data;
+global init_h;
+global observe_style
+[f_name, p_name ] = uiputfile('*.txt');
+if isequal(p_name,0) || isequal(f_name,0)
+   return;
+end
+full_name = fullfile(p_name, f_name);
+fp = fopen(full_name,'w');
+data_gap = (compare_data - filtered_x)';
+mse_filter_true = sum(data_gap.*data_gap)./size(data_gap,1);
+fprintf(fp,'滤波后数据和真实数据的MSE值(按状态变量维度显示)\n');
+fprintf(fp,[num2str(mse_filter_true),'\n']);
+trans_filtered_x = zeros(size(observe_data,1),size(observe_data,2));
+if strcmp(observe_style,'matrix')
+    for k=1:size(filtered_x,2)
+        trans_filtered_x(:,k) = init_h * filtered_x(:,k);
+    end
+else
+   for k=1:size(filtered_x,2)
+        trans_filtered_x(:,k) = init_h(filtered_x(:,k));
+    end
+end
+data_gap = (trans_filtered_x - observe_data)';
+mse_filter_true = sum(data_gap.*data_gap)./size(observe_data,2);
+fprintf(fp,'滤波后数据和测量数据的MSE值(按观测变量数据维度显示)\n');
+fprintf(fp,[num2str(mse_filter_true),'\n']);
 
 
 function output_filtered_Callback(hObject, eventdata, handles)
 global filtered_x;
-[f_name p_name ] = uiputfile('*.txt');
+[f_name, p_name ] = uiputfile('*.txt');
 if isequal(p_name,0) || isequal(f_name,0)
    return;
 end
@@ -424,3 +465,29 @@ if islegal_param
     show_list = {str1;str2;str3};
     set(hObject,'string',show_list,'value',1);
 end
+
+
+function popupmenu_analyse_Callback(hObject, eventdata, handles)
+
+
+function popupmenu_analyse_CreateFcn(hObject, eventdata, handles)
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+function edit_analyse_Callback(hObject, eventdata, handles)
+
+
+function edit_analyse_CreateFcn(hObject, eventdata, handles)
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+function pushbutton_filter_CreateFcn(hObject, eventdata, handles)
