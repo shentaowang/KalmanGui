@@ -302,7 +302,7 @@ if islegal_param && ~isempty(filtered_x)
                 legend('滤波后数据','真实数据');
                 x_lim = get(handles.axes_showcompare,'XLim');
                 y_lim = get(handles.axes_showcompare,'YLim');
-                text(x_lim(2)*0.5,y_lim(2)*0.8,str_mse);
+                text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse);
             end
         case 3
             if strcmp(observe_style,'matrix')
@@ -323,7 +323,7 @@ if islegal_param && ~isempty(filtered_x)
             legend('滤波后数据','观测数据');
             x_lim = get(handles.axes_showcompare,'XLim');
             y_lim = get(handles.axes_showcompare,'YLim');
-            text(x_lim(2)*0.5,y_lim(2)*0.8,str_mse);
+            text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse);
     end
 end
 
