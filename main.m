@@ -263,24 +263,29 @@ global compare_data;
 global islegal_param;
 global init_h;
 global observe_style;
+dim_data = size(filtered_x,2);
+x_zoom = 1.3;
 dim_show = get(handles.popupmenu_showlist,'value');
 if islegal_param && ~isempty(filtered_x)
     sel = get(handles.popupmenu_showmethod,'value');
     switch sel
         case 1
-            plot_x = 1:size(filtered_x,2);
+            plot_x = 1:dim_data;
             axes(handles.axes_showcompare);
             plot(plot_x,filtered_x(dim_show,:));
+            xlim([0 dim_data*x_zoom]);
             xlabel('数据点');
             ylabel('数据值');
+            legend('滤波后数据');
         case 2
-            plot_x = 1:size(filtered_x,2);
+            plot_x = 1:dim_data;
             isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
-                size(filtered_x,1) && size(compare_data,2) == size(filtered_x,2));
+                size(filtered_x,1) && size(compare_data,2) == dim_data);
             if isempty(compare_data)
                 compare_data = [];
                 axes(handles.axes_showcompare);
                 plot(plot_x,filtered_x(dim_show,:));
+                xlim([0 dim_data*x_zoom]);
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据');
@@ -288,8 +293,10 @@ if islegal_param && ~isempty(filtered_x)
             elseif isnot_match
                 axes(handles.axes_showcompare);
                 plot(plot_x,filtered_x(dim_show,:));
+                xlim([0 dim_data*x_zoom]);
                 xlabel('数据点');
                 ylabel('数据值');
+                legend('滤波后数据');
                 msgbox('滤波后数据和真实数据不匹配','Error','error');
             elseif ~isempty(compare_data)
                 axes(handles.axes_showcompare);
@@ -297,6 +304,7 @@ if islegal_param && ~isempty(filtered_x)
                 data_gap = filtered_x(dim_show,:)-compare_data(dim_show,:);
                 mse = sum(data_gap.*data_gap)/size(compare_data,2);
                 str_mse = ['MSE:',num2str(mse)];
+                xlim([0 dim_data*x_zoom]);
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据','真实数据');
@@ -308,16 +316,17 @@ if islegal_param && ~isempty(filtered_x)
             if strcmp(observe_style,'matrix')
                 trans_filtered_x = init_h * filtered_x;
             else
-                trans_filtered_x = zeros(dim_z,size(filtered_x,2));
+                trans_filtered_x = zeros(dim_z,dim_data);
                 for k = 1:size(trans_filtered_x,2)
                     trans_filtered_x(:,k) = init_h(filtered_x(:,k));
                 end
             end
-            plot_x = 1:size(filtered_x,2);
+            plot_x = 1:dim_data;
             plot(plot_x,trans_filtered_x(dim_show,:),plot_x,observe_data(dim_show,:),'--');
             data_gap = trans_filtered_x(dim_show,:)-observe_data(dim_show,:);
             mse = sum(data_gap.*data_gap)/size(observe_data,2);
             str_mse = ['MSE:',num2str(mse)];
+            xlim([0 dim_data*x_zoom]);
             xlabel('数据点');
             ylabel('数据值');
             legend('滤波后数据','观测数据');
