@@ -504,4 +504,8 @@ function pushbutton_filter_CreateFcn(hObject, eventdata, handles)
 
 function use_help_Callback(hObject, eventdata, handles)
 url = 'https://github.com/GeniusLight/KalmanGui';
-web(url,'-browser');
+try
+    web(url,'-browser');
+catch
+    msgbox('需使用浏览器联网查看，或者可选择看项目下文件：README.md','Warn','warn');
+end
