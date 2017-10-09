@@ -14,7 +14,7 @@ KalmanGui
 ### 主界面
 -----------
  ? ?主界面如下：
- ? ?![mian_ui](/img/main_ui.PNG "主界面")
+ ? ?![mian_ui](img/main_ui.PNG "主界面")
 
 参数初始化
 ------
