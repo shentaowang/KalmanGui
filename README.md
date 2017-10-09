@@ -13,10 +13,8 @@ KalmanGui
 
 ### 主界面
 -----------
-        主界面如下：
-
-![mian_ui](img/main_ui.png "主界面")
-
+|#|主界面|具体操作|
+|1|![mian_ui](https://github.com/GeniusLight/KalmanGui/blob/master/img/main_ui.PNG "主界面")|`初始化参数` 
 参数初始化
 ------
 
