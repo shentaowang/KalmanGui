@@ -13,7 +13,7 @@ KalmanGui
 
 ### 主界面
 -----------
-        主界面如下：
+主界面如下：
 ![mian_ui](https://github.com/GeniusLight/KalmanGui/blob/master/img/main_ui.PNG "主界面")
 
 |#|功能模块|具体介绍|
