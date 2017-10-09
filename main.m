@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 08-Oct-2017 16:18:21
+% Last Modified by GUIDE v2.5 09-Oct-2017 18:31:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -500,3 +500,9 @@ end
 
 
 function pushbutton_filter_CreateFcn(hObject, eventdata, handles)
+
+
+function use_help_Callback(hObject, eventdata, handles)
+url = 'https://github.com/GeniusLight/KalmanGui';
+web(url,'-browser');
+
