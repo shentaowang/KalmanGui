@@ -411,7 +411,7 @@ function menu_output_data_Callback(hObject, eventdata, handles)
 
 function menu_output_filtereddata_Callback(hObject, eventdata, handles)
 global filtered_x;
-[f_name, p_name ] = uiputfile('*.txt');
+[f_name, p_name ] = uiputfile({'*.txt';},'导出滤波后数据','Undefined.txt');
 if isequal(p_name,0) || isequal(f_name,0)
     return;
 end
@@ -434,7 +434,7 @@ global observe_data;
 global compare_data;
 global init_h;
 global observe_style
-[f_name, p_name ] = uiputfile('*.txt');
+[f_name, p_name ] = uiputfile({'*.txt';},'导出分析结果','Undefined.txt');
 if isequal(p_name,0) || isequal(f_name,0)
     return;
 end
@@ -460,7 +460,15 @@ fprintf(fp,'滤波后数据和测量数据的MSE值(按观测变量数据维度显示)\n');
 fprintf(fp,[num2str(mse_filter_true),'\n']);
 
 function menu_output_figure_Callback(hObject, eventdata, handles)
-
+[filename,pathname]=uiputfile({'*.bmp';},'保存图片','Undefined.bmp');
+if ~isequal(filename,0)
+    str = [pathname filename];
+%     px=getframe(handles.axes_showcompare);
+    saveas(handles.axes_showcompare,str,'bmp');
+%     imwrite(px.cdata,str,'bmp');
+else
+    disp('保存失败');
+end;
 
 function menu_import_observedata_Callback(hObject, eventdata, handles)
 global observe_data;
