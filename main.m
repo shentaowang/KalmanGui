@@ -27,13 +27,13 @@ function varargout = main(varargin)
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @main_OpeningFcn, ...
-                   'gui_OutputFcn',  @main_OutputFcn, ...
-                   'gui_LayoutFcn',  [], ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @main_OpeningFcn, ...
+    'gui_OutputFcn',  @main_OutputFcn, ...
+    'gui_LayoutFcn',  [], ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
-   gui_State.gui_Callback = str2func(varargin{1});
+    gui_State.gui_Callback = str2func(varargin{1});
 end
 
 if nargout
@@ -217,7 +217,7 @@ switch combine_style
         end
         filtered_x = filtering_data;
     case 'formulamatrix'
- dim_data = size(observe_data,2);
+        dim_data = size(observe_data,2);
         filtering_data = zeros(dim_x,dim_data);
         fstate = init_f;
         hmeas = @(x)init_h*x;
@@ -277,6 +277,7 @@ if islegal_param && ~isempty(filtered_x)
             xlabel('数据点');
             ylabel('数据值');
             legend('滤波后数据');
+            zoom on;
         case 2
             plot_x = 1:dim_data;
             isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
@@ -289,6 +290,7 @@ if islegal_param && ~isempty(filtered_x)
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据');
+                zoom on;
                 msgbox('真实数据未输入，只显示滤波数据','Error','error');
             elseif isnot_match
                 axes(handles.axes_showcompare);
@@ -297,10 +299,11 @@ if islegal_param && ~isempty(filtered_x)
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据');
+                zoom on;
                 msgbox('滤波后数据和真实数据不匹配','Error','error');
             elseif ~isempty(compare_data)
                 axes(handles.axes_showcompare);
-                plot(plot_x,filtered_x(dim_show,:),plot_x,compare_data(dim_show,:),'--');
+                plot(plot_x,filtered_x(dim_show,:),plot_x,compare_data(dim_show,:),'*');
                 data_gap = filtered_x(dim_show,:)-compare_data(dim_show,:);
                 mse = sum(data_gap.*data_gap)/size(compare_data,2);
                 str_mse = ['MSE:',num2str(mse)];
@@ -311,6 +314,7 @@ if islegal_param && ~isempty(filtered_x)
                 x_lim = get(handles.axes_showcompare,'XLim');
                 y_lim = get(handles.axes_showcompare,'YLim');
                 text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse);
+                zoom on;
             end
         case 3
             if strcmp(observe_style,'matrix')
@@ -322,7 +326,7 @@ if islegal_param && ~isempty(filtered_x)
                 end
             end
             plot_x = 1:dim_data;
-            plot(plot_x,trans_filtered_x(dim_show,:),plot_x,observe_data(dim_show,:),'--');
+            plot(plot_x,trans_filtered_x(dim_show,:),plot_x,observe_data(dim_show,:),'*');
             data_gap = trans_filtered_x(dim_show,:)-observe_data(dim_show,:);
             mse = sum(data_gap.*data_gap)/size(observe_data,2);
             str_mse = ['MSE:',num2str(mse)];
@@ -333,6 +337,7 @@ if islegal_param && ~isempty(filtered_x)
             x_lim = get(handles.axes_showcompare,'XLim');
             y_lim = get(handles.axes_showcompare,'YLim');
             text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse);
+            zoom on;
     end
 end
 
@@ -372,7 +377,7 @@ global init_h;
 global observe_style
 [f_name, p_name ] = uiputfile('*.txt');
 if isequal(p_name,0) || isequal(f_name,0)
-   return;
+    return;
 end
 full_name = fullfile(p_name, f_name);
 fp = fopen(full_name,'w');
@@ -386,7 +391,7 @@ if strcmp(observe_style,'matrix')
         trans_filtered_x(:,k) = init_h * filtered_x(:,k);
     end
 else
-   for k=1:size(filtered_x,2)
+    for k=1:size(filtered_x,2)
         trans_filtered_x(:,k) = init_h(filtered_x(:,k));
     end
 end
@@ -400,7 +405,7 @@ function output_filtered_Callback(hObject, eventdata, handles)
 global filtered_x;
 [f_name, p_name ] = uiputfile('*.txt');
 if isequal(p_name,0) || isequal(f_name,0)
-   return;
+    return;
 end
 full_name = fullfile(p_name, f_name);
 fp = fopen(full_name,'w');
