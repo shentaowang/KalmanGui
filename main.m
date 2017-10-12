@@ -228,21 +228,8 @@ if islegal_param && ~isempty(filtered_x)
             isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
                 size(filtered_x,1) && size(compare_data,2) == dim_data);
             if isempty(compare_data)
-                compare_data = [];
-                axes(handles.axes_showcompare);
-                plot(plot_x,filtered_x(dim_show,:));
-                xlim([0 dim_data*x_zoom]);
-                xlabel('数据点');
-                ylabel('数据值');
-                legend('滤波后数据');
-                msgbox('真实数据未输入，只显示滤波数据','Error','error');
+                msgbox('真实数据未输入','Error','error');
             elseif isnot_match
-                axes(handles.axes_showcompare);
-                plot(plot_x,filtered_x(dim_show,:));
-                xlim([0 dim_data*x_zoom]);
-                xlabel('数据点');
-                ylabel('数据值');
-                legend('滤波后数据');
                 msgbox('滤波后数据和真实数据不匹配','Error','error');
             elseif ~isempty(compare_data)
                 axes(handles.axes_showcompare);
@@ -279,6 +266,53 @@ if islegal_param && ~isempty(filtered_x)
             x_lim = get(handles.axes_showcompare,'XLim');
             y_lim = get(handles.axes_showcompare,'YLim');
             text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse);
+        case 4
+            plot_x = 1:dim_data;
+            isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
+                size(filtered_x,1) && size(compare_data,2) == dim_data);
+            if isempty(compare_data)
+                msgbox('真实数据未输入','Error','error');
+            elseif isnot_match
+                msgbox('滤波后数据和真实数据不匹配','Error','error');
+            elseif ~isempty(compare_data)
+                axes(handles.axes_showcompare);
+                if strcmp(observe_style,'matrix')
+                    trans_filtered_x = init_h * filtered_x;
+                    trans_compare = init_h * compare_data;
+                else
+                    trans_filtered_x = zeros(dim_z,dim_data);
+                    trans_compare = zeros(dim_z,dim_data);
+                    for k = 1:size(trans_filtered_x,2)
+                        trans_filtered_x(:,k) = init_h(filtered_x(:,k));
+                        trans_compare(:,k) = init_h(compare_data(:,k));
+                    end
+                end
+                plot(plot_x,trans_filtered_x(dim_show,:),plot_x,observe_data(dim_show,:),'*',...
+                    plot_x,trans_compare(dim_show,:),'+');
+                data_gap = trans_filtered_x(dim_show,:)-observe_data(dim_show,:);
+                mse = sum(data_gap.*data_gap)/size(observe_data,2);
+                str_mse_filter_observe = num2str(mse);
+                data_gap = trans_filtered_x(dim_show,:)-trans_compare(dim_show,:);
+                mse = sum(data_gap.*data_gap)/size(observe_data,2);
+                str_mse_filter_true = num2str(mse);
+                xlim([0 dim_data*x_zoom]);
+                xlabel('数据点');
+                ylabel('数据值');
+                legend('滤波后数据(1)','观测数据(2)','真实数据(3)');
+                x_lim = get(handles.axes_showcompare,'XLim');
+                y_lim = get(handles.axes_showcompare,'YLim');
+                x_pos = x_lim(1)+(x_lim(2)-x_lim(1))*0.8;
+                y_pos = y_lim(2)-(y_lim(2)-y_lim(1))*0.16;
+                text(x_pos,y_pos,'(1)和(2)MSE:')
+                y_pos = y_lim(2)-(y_lim(2)-y_lim(1))*0.20;
+                text(x_pos,y_pos,str_mse_filter_observe);
+                y_pos = y_lim(2)-(y_lim(2)-y_lim(1))*0.24;
+                text(x_pos,y_pos,'(1)和(3)MSE:');
+                y_pos = y_lim(2)-(y_lim(2)-y_lim(1))*0.28;
+                text(x_pos,y_pos,str_mse_filter_true);
+            end
+        otherwise
+                msgbox('存在一些问题,开发者没考虑到','Error','error');
     end
 end
 
@@ -350,6 +384,19 @@ if islegal_param
                 show_list = mat2cell(show_list,size(show_list,1),size(show_list,2));
                 set(handles.popupmenu_showlist,'string',show_list{1,1},'value',1);
             end
+        case 4
+            show_list = [];
+            str_prefix = '显示z(';
+            str_suffix = ')';
+            if dim_z > 0
+                for k=1:dim_z
+                    show_list = [show_list;strcat(str_prefix,num2str(k),str_suffix)];
+                end
+                show_list = mat2cell(show_list,size(show_list,1),size(show_list,2));
+                set(handles.popupmenu_showlist,'string',show_list{1,1},'value',1);
+            end
+        otherwise
+                msgbox('存在一些问题,开发者没考虑到','Error','error');
     end
 end
 
@@ -365,7 +412,8 @@ if islegal_param
     str1 = '单独显示滤波后数据';
     str2 = '滤波后数据和真实数据(dim_x维)';
     str3 = '滤波后数据和观测数据(dim_z维)';
-    show_list = {str1;str2;str3};
+    str4 = '滤波后、观测、真实数据(dim_z维)';
+    show_list = {str1;str2;str3;str4};
     set(hObject,'string',show_list,'value',1);
 end
 
@@ -434,16 +482,24 @@ global observe_data;
 global compare_data;
 global init_h;
 global observe_style
+
+is_match = size(compare_data,1) == size(filtered_x,1) &&...
+    size(compare_data,1) == size(filtered_x,1);
 [f_name, p_name ] = uiputfile({'*.txt';},'导出分析结果','Undefined.txt');
 if isequal(p_name,0) || isequal(f_name,0)
     return;
 end
 full_name = fullfile(p_name, f_name);
 fp = fopen(full_name,'w');
-data_gap = (compare_data - filtered_x)';
-mse_filter_true = sum(data_gap.*data_gap)./size(data_gap,1);
-fprintf(fp,'滤波后数据和真实数据的MSE值(按状态变量维度显示)\n');
-fprintf(fp,[num2str(mse_filter_true),'\n']);
+if is_match
+    data_gap = (compare_data - filtered_x)';
+    mse_filter_true = sum(data_gap.*data_gap)./size(data_gap,1);
+    fprintf(fp,'滤波后数据和真实数据的MSE值(按状态变量维度显示)\n');
+    fprintf(fp,[num2str(mse_filter_true),'\n']);
+else
+    fprintf(fp,'导入真实数据不匹配或者未导入\n');
+    fprintf(fp,'\n');
+end
 trans_filtered_x = zeros(size(observe_data,1),size(observe_data,2));
 if strcmp(observe_style,'matrix')
     for k=1:size(filtered_x,2)
@@ -472,15 +528,14 @@ end;
 
 function menu_import_observedata_Callback(hObject, eventdata, handles)
 global observe_data;
-observe_data = [];
 [f_name, p_name] = uigetfile('*.txt');
 %if choose the cancle
 if isequal(p_name,0)
     return;
 end
 full_name = fullfile(p_name, f_name);
-
 fp = fopen(full_name);
+observe_data = [];
 while 1
     tline = fgetl(fp);
     if ~ischar(tline)
@@ -498,15 +553,14 @@ end
 
 function menu_import_truedata_Callback(hObject, eventdata, handles)
 global compare_data;
-compare_data = [];
 [f_name, p_name] = uigetfile('*.txt');
 %if choose the cancle
 if isequal(p_name,0)
     return;
 end
 full_name = fullfile(p_name, f_name);
-
 fp = fopen(full_name);
+compare_data = [];
 while 1
     tline = fgetl(fp);
     if ~ischar(tline)
