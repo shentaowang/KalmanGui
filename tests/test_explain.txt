@@ -3,6 +3,10 @@ matrixmatrix:mm
 matrixformula:mf
 formulamatrix:fm
 formulaformula:ff
+
+使用注意点：
+1.使用sat表示时间
+
 _______________________________________
 文件类型说明
 xx_observe_xx:含噪声时观测变量数据
@@ -20,11 +24,12 @@ init_x = [10 4.5]
 
 _______________________________________
 ff_observe_01.txt
+sample_t = 106
 dim_x = 4
 dim_z = 3
 init_x = [8.46642 0 0 0];
 init_p = [1 0 0 0;0 1 0 0;0 0 1 0;0 0 0 1]
 init_q = [0 0 0 0;0 0 0 0;0 0 0 0.09 0;0 0 0 0.09]
 init_r = [0.09 0 0;0 0.009 0;0 0 0.09]
-init_f = @(x)@(x)[x(1)+t*x(3);x(2)+t*x(4);x(3);x(4)]
+init_f = @(x)[x(1)+sat*x(3);x(2)+sat*x(4);x(3);x(4)]
 init_h = @(x)[sqrt(x(1)^2+x(2)^2);atan(x(2)/x(1));(x(1)*x(3)+x(2)*x(4))/(x(1)^2+x(2)^2)]
