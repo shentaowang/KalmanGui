@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 09-Oct-2017 20:29:44
+% Last Modified by GUIDE v2.5 12-Oct-2017 20:31:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -113,60 +113,6 @@ function varargout = main_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
-
-
-function import_observe_Callback(hObject, eventdata, handles)
-global observe_data;
-observe_data = [];
-[f_name, p_name] = uigetfile('*.txt');
-%if choose the cancle
-if isequal(p_name,0)
-    return;
-end
-full_name = fullfile(p_name, f_name);
-
-fp = fopen(full_name);
-while 1
-    tline = fgetl(fp);
-    if ~ischar(tline)
-        break;
-    end
-    tline = str2num(tline);
-    %check if the data is standard, but need more rule
-    if isempty(tline)
-        msgbox('Please input the standard data', 'Error', 'error');
-        observe_data = [];
-        return;
-    end
-    observe_data = [observe_data tline'];
-end
-
-
-function import_compare_Callback(hObject, eventdata, handles)
-global compare_data;
-compare_data = [];
-[f_name, p_name] = uigetfile('*.txt');
-%if choose the cancle
-if isequal(p_name,0)
-    return;
-end
-full_name = fullfile(p_name, f_name);
-
-fp = fopen(full_name);
-while 1
-    tline = fgetl(fp);
-    if ~ischar(tline)
-        break;
-    end
-    tline = str2num(tline);
-    %check if the data is standard, but need more rule
-    if isempty(tline)
-        msgbox('Please input the standard data', 'Error', 'error');
-        compare_data = [];
-        return;
-    end
-    compare_data = [compare_data tline'];
-end
 
 
 function init_param_Callback(hObject, eventdata, handles)
@@ -277,7 +223,6 @@ if islegal_param && ~isempty(filtered_x)
             xlabel('数据点');
             ylabel('数据值');
             legend('滤波后数据');
-            zoom on;
         case 2
             plot_x = 1:dim_data;
             isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
@@ -290,7 +235,6 @@ if islegal_param && ~isempty(filtered_x)
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据');
-                zoom on;
                 msgbox('真实数据未输入，只显示滤波数据','Error','error');
             elseif isnot_match
                 axes(handles.axes_showcompare);
@@ -299,7 +243,6 @@ if islegal_param && ~isempty(filtered_x)
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据');
-                zoom on;
                 msgbox('滤波后数据和真实数据不匹配','Error','error');
             elseif ~isempty(compare_data)
                 axes(handles.axes_showcompare);
@@ -314,7 +257,6 @@ if islegal_param && ~isempty(filtered_x)
                 x_lim = get(handles.axes_showcompare,'XLim');
                 y_lim = get(handles.axes_showcompare,'YLim');
                 text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse);
-                zoom on;
             end
         case 3
             if strcmp(observe_style,'matrix')
@@ -337,7 +279,6 @@ if islegal_param && ~isempty(filtered_x)
             x_lim = get(handles.axes_showcompare,'XLim');
             y_lim = get(handles.axes_showcompare,'YLim');
             text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse);
-            zoom on;
     end
 end
 
@@ -368,58 +309,6 @@ if islegal_param
 end
 
 function axes_showcompare_CreateFcn(hObject, eventdata, handles)
-
-function output_analyze_Callback(hObject, eventdata, handles)
-global filtered_x;
-global observe_data;
-global compare_data;
-global init_h;
-global observe_style
-[f_name, p_name ] = uiputfile('*.txt');
-if isequal(p_name,0) || isequal(f_name,0)
-    return;
-end
-full_name = fullfile(p_name, f_name);
-fp = fopen(full_name,'w');
-data_gap = (compare_data - filtered_x)';
-mse_filter_true = sum(data_gap.*data_gap)./size(data_gap,1);
-fprintf(fp,'滤波后数据和真实数据的MSE值(按状态变量维度显示)\n');
-fprintf(fp,[num2str(mse_filter_true),'\n']);
-trans_filtered_x = zeros(size(observe_data,1),size(observe_data,2));
-if strcmp(observe_style,'matrix')
-    for k=1:size(filtered_x,2)
-        trans_filtered_x(:,k) = init_h * filtered_x(:,k);
-    end
-else
-    for k=1:size(filtered_x,2)
-        trans_filtered_x(:,k) = init_h(filtered_x(:,k));
-    end
-end
-data_gap = (trans_filtered_x - observe_data)';
-mse_filter_true = sum(data_gap.*data_gap)./size(observe_data,2);
-fprintf(fp,'滤波后数据和测量数据的MSE值(按观测变量数据维度显示)\n');
-fprintf(fp,[num2str(mse_filter_true),'\n']);
-
-
-function output_filtered_Callback(hObject, eventdata, handles)
-global filtered_x;
-[f_name, p_name ] = uiputfile('*.txt');
-if isequal(p_name,0) || isequal(f_name,0)
-    return;
-end
-full_name = fullfile(p_name, f_name);
-fp = fopen(full_name,'w');
-dim_data = size(filtered_x,2);
-dim_x = size(filtered_x,1);
-
-output_data = filtered_x';
-for k=1:dim_data
-    for m=1:dim_x
-        fprintf(fp,'%6f\t',output_data(k,m));
-    end
-    fprintf(fp,'\r\n');
-end
-
 
 function popupmenu_showmethod_Callback(hObject, eventdata, handles)
 global islegal_param;
@@ -481,8 +370,6 @@ if islegal_param
 end
 
 
-function popupmenu_analyse_Callback(hObject, eventdata, handles)
-
 
 function popupmenu_analyse_CreateFcn(hObject, eventdata, handles)
 % Hint: popupmenu controls usually have a white background on Windows.
@@ -508,9 +395,132 @@ function pushbutton_filter_CreateFcn(hObject, eventdata, handles)
 
 
 function use_help_Callback(hObject, eventdata, handles)
+
+
+function fig_operate_Callback(hObject, eventdata, handles)
+
+
+function uipushtool_save_ClickedCallback(hObject, eventdata, handles)
+
+
+function menu_import_data_Callback(hObject, eventdata, handles)
+
+
+function menu_output_data_Callback(hObject, eventdata, handles)
+
+
+function menu_output_filtereddata_Callback(hObject, eventdata, handles)
+global filtered_x;
+[f_name, p_name ] = uiputfile('*.txt');
+if isequal(p_name,0) || isequal(f_name,0)
+    return;
+end
+full_name = fullfile(p_name, f_name);
+fp = fopen(full_name,'w');
+dim_data = size(filtered_x,2);
+dim_x = size(filtered_x,1);
+
+output_data = filtered_x';
+for k=1:dim_data
+    for m=1:dim_x
+        fprintf(fp,'%6f\t',output_data(k,m));
+    end
+    fprintf(fp,'\r\n');
+end
+
+function menu_output_analyse_Callback(hObject, eventdata, handles)
+global filtered_x;
+global observe_data;
+global compare_data;
+global init_h;
+global observe_style
+[f_name, p_name ] = uiputfile('*.txt');
+if isequal(p_name,0) || isequal(f_name,0)
+    return;
+end
+full_name = fullfile(p_name, f_name);
+fp = fopen(full_name,'w');
+data_gap = (compare_data - filtered_x)';
+mse_filter_true = sum(data_gap.*data_gap)./size(data_gap,1);
+fprintf(fp,'滤波后数据和真实数据的MSE值(按状态变量维度显示)\n');
+fprintf(fp,[num2str(mse_filter_true),'\n']);
+trans_filtered_x = zeros(size(observe_data,1),size(observe_data,2));
+if strcmp(observe_style,'matrix')
+    for k=1:size(filtered_x,2)
+        trans_filtered_x(:,k) = init_h * filtered_x(:,k);
+    end
+else
+    for k=1:size(filtered_x,2)
+        trans_filtered_x(:,k) = init_h(filtered_x(:,k));
+    end
+end
+data_gap = (trans_filtered_x - observe_data)';
+mse_filter_true = sum(data_gap.*data_gap)./size(observe_data,2);
+fprintf(fp,'滤波后数据和测量数据的MSE值(按观测变量数据维度显示)\n');
+fprintf(fp,[num2str(mse_filter_true),'\n']);
+
+function menu_output_figure_Callback(hObject, eventdata, handles)
+
+
+function menu_import_observedata_Callback(hObject, eventdata, handles)
+global observe_data;
+observe_data = [];
+[f_name, p_name] = uigetfile('*.txt');
+%if choose the cancle
+if isequal(p_name,0)
+    return;
+end
+full_name = fullfile(p_name, f_name);
+
+fp = fopen(full_name);
+while 1
+    tline = fgetl(fp);
+    if ~ischar(tline)
+        break;
+    end
+    tline = str2num(tline);
+    %check if the data is standard, but need more rule
+    if isempty(tline)
+        msgbox('Please input the standard data', 'Error', 'error');
+        observe_data = [];
+        return;
+    end
+    observe_data = [observe_data tline'];
+end
+
+function menu_import_truedata_Callback(hObject, eventdata, handles)
+global compare_data;
+compare_data = [];
+[f_name, p_name] = uigetfile('*.txt');
+%if choose the cancle
+if isequal(p_name,0)
+    return;
+end
+full_name = fullfile(p_name, f_name);
+
+fp = fopen(full_name);
+while 1
+    tline = fgetl(fp);
+    if ~ischar(tline)
+        break;
+    end
+    tline = str2num(tline);
+    %check if the data is standard, but need more rule
+    if isempty(tline)
+        msgbox('Please input the standard data', 'Error', 'error');
+        compare_data = [];
+        return;
+    end
+    compare_data = [compare_data tline'];
+end
+
+function use_help_github_Callback(hObject, eventdata, handles)
 url = 'https://github.com/GeniusLight/KalmanGui';
 try
     web(url,'-browser');
 catch
     msgbox('需使用浏览器联网查看，或者可选择看项目下文件：README.md','Warn','warn');
 end
+
+
+function uipanel6_CreateFcn(hObject, eventdata, handles)
