@@ -574,30 +574,136 @@ function menu_init_output_data_Callback(hObject, eventdata, handles)
 
 function menu_init_output_config_Callback(hObject, eventdata, handles)
 global islegal_param;
+global dim_x;
+global dim_z;
+global sample_t;
 global init_x;
 global init_p;
 global init_q;
 global init_r;
-global init_f;
-global init_h;
-global dim_x;
-global dim_z;
-global sample_t;
 global transition_style;
 global observe_style;
+global init_f;
+global init_h;
+
 if islegal_param
     [f_name, p_name ] = uiputfile({'*.txt';},'导出配置文件','Undefined.txt');
     if isequal(p_name,0) || isequal(f_name,0)
         return;
     end
     full_name = fullfile(p_name, f_name);
-    fp = fopen(full_name,'w');
+    fp = fopen(full_name,'wt');
     %have 11 param
-    
-    fclose(fp);
+    fprintf(fp, '%s:\n%s\n\n', 'dim_x', num2str(dim_x));
+    fprintf(fp, '%s:\n%s\n\n', 'dim_z', num2str(dim_z));
+    fprintf(fp, '%s:\n%s\n\n', 'sample_t', num2str(sample_t));
+    fprintf(fp,'%s:\n', 'init_x');
+    fprintf(fp, [repmat('%d ', 1, size(init_x,2)), '\n'], init_x');
+    fprintf(fp,'\n');
+    fprintf(fp,'%s:\n', 'init_p');
+    fprintf(fp, [repmat('%d ', 1, size(init_p,2)), '\n'], init_p');
+    fprintf(fp,'\n');
+    fprintf(fp,'%s:\n', 'init_q');
+    fprintf(fp, [repmat('%d ', 1, size(init_q,2)), '\n'], init_q');
+    fprintf(fp,'\n');
+    fprintf(fp,'%s:\n', 'init_r');
+    fprintf(fp, [repmat('%d ', 1, size(init_r,2)), '\n'], init_r');
+    fprintf(fp,'\n');
+    fprintf(fp, '%s:\n%s\n', 'transition_style', transition_style);
+    fprintf(fp,'\n');
+    if strcmp(transition_style,'matrix')
+        fprintf(fp,'%s:\n', 'init_f');
+        fprintf(fp, [repmat('%d ', 1, size(init_f,2)), '\n'], init_f');
+        fprintf(fp,'\n');
+    else
+        fprintf(fp, '%s:\n%s\n\n', 'init_f', func2str(init_f));
+    end
+    fprintf(fp, '%s:\n%s\n\n', 'observe_style', observe_style);
+    if strcmp(observe_style,'matrix')
+        fprintf(fp,'%s:\n', 'init_h');
+        fprintf(fp, [repmat('%d ', 1, size(init_h,2)), '\n'], init_h');
+        fprintf(fp,'\n');
+    else
+        fprintf(fp, '%s:\n%s\n\n', 'init_f', func2str(init_h));
+    end
 else
     msgbox('参数不合法，请导出合法的参数','Error','error');
 end
 
-
 function menu_init_import_config_Callback(hObject, eventdata, handles)
+% global islegal_param;
+% global dim_x;
+% global dim_z;
+% global sample_t;
+% global init_x;
+% global init_p;
+% global init_q;
+% global init_r;
+% global transition_style;
+% global observe_style;
+% global init_f;
+% global init_h;
+[f_name, p_name ] = uigetfile({'*.txt';},'导人配置文件','Undefined.txt');
+if isequal(p_name,0) || isequal(f_name,0)
+    return;
+end
+
+full_name = fullfile(p_name, f_name);
+fp = fopen(full_name);
+dim_x = textscan(fp,'%d','HeaderLines',1);
+dim_x = dim_x{:};
+dim_z = textscan(fp,'%d','HeaderLines',1);
+dim_z = dim_z{:};
+sample_t = textscan(fp,'%d','HeaderLines',1);
+sample_t = sample_t{:};
+init_x = textscan(fp,'%[^init_p]','HeaderLines',1);
+try
+    init_x = str2num(init_x{:}{:});
+catch
+    init_x = init_x{:};
+end
+init_p = textscan(fp,'%[^init_q]','HeaderLines',1);
+try
+    init_p = str2num(init_p{:}{:});
+catch
+    init_p = init_p{:};
+end
+init_q = textscan(fp,'%[^init_r]','HeaderLines',1);
+try
+    init_q = str2num(init_q{:}{:});
+catch
+    init_q = init_q{:};
+end
+init_r = textscan(fp,'%[^transition_style]','HeaderLines',1);
+try
+    init_r = str2num(init_r{:}{:});
+catch
+    init_r = init_r{:};
+end
+transition_style = textscan(fp,'%s[^init_f]','HeaderLines',1);
+transition_style = transition_style{:}{:};
+if strcmp(transition_style,'matrix')
+    init_f = textscan(fp,'%[^observe_style]','HeaderLines',3);
+    try
+        init_f = str2num(init_f{:}{:});
+    catch
+        init_f = init_f{:};
+    end
+else
+    init_f = textscan(fp,'%[^observe_style]','HeaderLines',3);
+    init_f = str2func(init_f{:});
+end
+observe_style = textscan(fp,'%s[^init_h]','HeaderLines',1);
+observe_style = observe_style{:}{:};
+if strcmp(observe_style,'matrix')
+    init_h = textscan(fp,'%d','HeaderLines',3);
+    try
+        init_h = str2num(init_h{:}{:});
+    catch
+        init_h = init_h{:};
+    end
+else
+    init_h = textscan(fp,'%s','HeaderLines',3);
+    init_h = str2func(init_h{:});
+end
+
