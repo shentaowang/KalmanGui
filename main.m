@@ -534,21 +534,11 @@ if isequal(p_name,0)
     return;
 end
 full_name = fullfile(p_name, f_name);
-fp = fopen(full_name);
-observe_data = [];
-while 1
-    tline = fgetl(fp);
-    if ~ischar(tline)
-        break;
-    end
-    tline = str2num(tline);
-    %check if the data is standard, but need more rule
-    if isempty(tline)
-        msgbox('Please input the standard data', 'Error', 'error');
-        observe_data = [];
-        return;
-    end
-    observe_data = [observe_data tline'];
+format long g
+try
+    observe_data = load(full_name);
+catch
+    msgbox('请输入合法的数据','Error','error');
 end
 
 function menu_import_truedata_Callback(hObject, eventdata, handles)
@@ -559,21 +549,11 @@ if isequal(p_name,0)
     return;
 end
 full_name = fullfile(p_name, f_name);
-fp = fopen(full_name);
-compare_data = [];
-while 1
-    tline = fgetl(fp);
-    if ~ischar(tline)
-        break;
-    end
-    tline = str2num(tline);
-    %check if the data is standard, but need more rule
-    if isempty(tline)
-        msgbox('Please input the standard data', 'Error', 'error');
-        compare_data = [];
-        return;
-    end
-    compare_data = [compare_data tline'];
+format long g
+try
+    compare_data = load(full_name);
+catch
+    msgbox('请输入合法的数据','Error','error');
 end
 
 function use_help_github_Callback(hObject, eventdata, handles)

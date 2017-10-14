@@ -22,7 +22,7 @@ function varargout = init_param(varargin)
 
 % Edit the above text to modify the response to help init_param
 
-% Last Modified by GUIDE v2.5 04-Oct-2017 16:41:06
+% Last Modified by GUIDE v2.5 14-Oct-2017 18:41:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -564,3 +564,40 @@ function radiobutton_observe_matrix_Callback(hObject, eventdata, handles)
 
 function radiobutton_transition_matrix_Callback(hObject, eventdata, handles)
 
+
+
+function menu_init_import_data_Callback(hObject, eventdata, handles)
+
+
+function menu_init_output_data_Callback(hObject, eventdata, handles)
+
+
+function menu_init_output_config_Callback(hObject, eventdata, handles)
+global islegal_param;
+global init_x;
+global init_p;
+global init_q;
+global init_r;
+global init_f;
+global init_h;
+global dim_x;
+global dim_z;
+global sample_t;
+global transition_style;
+global observe_style;
+if islegal_param
+    [f_name, p_name ] = uiputfile({'*.txt';},'导出配置文件','Undefined.txt');
+    if isequal(p_name,0) || isequal(f_name,0)
+        return;
+    end
+    full_name = fullfile(p_name, f_name);
+    fp = fopen(full_name,'w');
+    %have 11 param
+    
+    fclose(fp);
+else
+    msgbox('参数不合法，请导出合法的参数','Error','error');
+end
+
+
+function menu_init_import_config_Callback(hObject, eventdata, handles)
