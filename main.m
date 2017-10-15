@@ -525,12 +525,16 @@ function menu_output_figure_Callback(hObject, eventdata, handles)
 [filename,pathname]=uiputfile({'*.bmp';},'保存图片','Undefined.bmp');
 if ~isequal(filename,0)
     str = [pathname filename];
-%     px=getframe(handles.axes_showcompare);
-    saveas(handles.axes_showcompare,str,'bmp');
-%     imwrite(px.cdata,str,'bmp');
 else
-    disp('保存失败');
+    return;
 end;
+%     px=getframe(handles.axes_showcompare);
+try
+    saveas(handles.axes_showcompare,str,'bmp');
+    %     imwrite(px.cdata,str,'bmp');
+catch
+    disp('保存失败');
+end
 
 function menu_import_observedata_Callback(hObject, eventdata, handles)
 global observe_data;
@@ -542,7 +546,7 @@ end
 full_name = fullfile(p_name, f_name);
 format long g
 try
-    observe_data = load(full_name);
+    observe_data = load(full_name)';
 catch
     msgbox('请输入合法的数据','Error','error');
 end
@@ -557,7 +561,7 @@ end
 full_name = fullfile(p_name, f_name);
 format long g
 try
-    compare_data = load(full_name);
+    compare_data = load(full_name)';
 catch
     msgbox('请输入合法的数据','Error','error');
 end
