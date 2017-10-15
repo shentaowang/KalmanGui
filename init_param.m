@@ -59,16 +59,12 @@ global init_x;
 global init_p;
 global init_q;
 global init_r;
-global init_f;
 global init_f_str;
-global init_h;
 global init_h_str;
 global dim_x;
 global dim_z;
 global sample_t;
 global islegal_param;
-global transition_style;
-global observe_style;
 is_inrange = dim_x > 0 && dim_x < DIM_MAX && dim_z > 0 && dim_z < DIM_MAX;
 is_integer = (dim_x == fix(dim_x)) && (dim_z == fix(dim_z));
 if is_inrange && is_integer && ~islegal_param
@@ -87,20 +83,10 @@ elseif is_inrange && is_integer && islegal_param
     set(handles.edit_dim_z,'string',num2str(dim_z));
     set(handles.edit_init_x,'string',num2str(init_x'));
     set(handles.edit_init_p,'string',num2str(init_p));
-    set(handles.edit_transition,'string',init_f_str);
-    set(handles.edit_observe,'string',init_h_str);
-%     if strcmp(transition_style,'matrix')
-%         set(handles.edit_transition,'string',num2str(init_f));
-%     else
-%         set(handles.edit_transition,'string',func2str(init_f));
-%     end
-%     if strcmp(observe_style,'matrix')
-%         set(handles.edit_observe,'string',num2str(init_h));
-%     else
-%         set(handles.edit_observe,'string',func2str(init_h));
-%     end
     set(handles.edit_init_q,'string',num2str(init_q));
     set(handles.edit_init_r,'string',num2str(init_r));
+    set(handles.edit_transition,'string',init_f_str);
+    set(handles.edit_observe,'string',init_h_str);
 else
     set(handles.edit_dim_x,'string','');
     set(handles.edit_dim_z,'string','');
@@ -641,7 +627,7 @@ if islegal_param
     else
         fprintf(fp, '%s:\n%s\n\n', 'init_h', func2str(init_h));
     end
-    fprintf(fp, '%s:\n', 'end');
+    fprintf(fp, '%s\n', 'end');
 else
     msgbox('参数不合法，请导出合法的参数','Error','error');
 end
@@ -658,7 +644,9 @@ global init_r;
 global transition_style;
 global observe_style;
 global init_f;
+global init_f_str;
 global init_h;
+global init_h_str;
 global DIM_MAX
 [f_name, p_name ] = uigetfile({'*.txt';},'导人配置文件','Undefined.txt');
 if isequal(p_name,0) || isequal(f_name,0)
@@ -708,8 +696,10 @@ if strcmp(transition_style_temp,'matrix')
     end
     observe_style_temp = textscan(fp,'%s[^init_h]','HeaderLines',1);
 else
-    init_f_temp = textscan(fp,'%s[^observe_style]','HeaderLines',3);
-    init_f_temp = str2func(init_f_temp{:}{:});
+    init_f_temp_str = textscan(fp,'%s[^observe_style]','HeaderLines',3);
+    init_f_temp_str = init_f_temp_str{:}{:};
+    init_f_str_trans = strrep(init_f_temp_str,'sat',num2str(sample_t/1000));
+    init_f_temp = str2func(init_f_str_trans);
     observe_style_temp = textscan(fp,'%s[^init_h]','HeaderLines',3);
 end
 observe_style_temp = observe_style_temp{:}{:};
@@ -721,8 +711,10 @@ if strcmp(observe_style_temp,'matrix')
         init_h_temp = init_h_temp{:};
     end
 else
-    init_h_temp = textscan(fp,'%[^end]','HeaderLines',3);
-    init_h_temp = str2func(init_h_temp{:}{:});
+    init_h_temp_str = textscan(fp,'%s[^end]','HeaderLines',3);
+    init_h_temp_str = init_h_temp_str{:}{:};
+    init_h_str_trans = strrep(init_h_temp_str,'sat',num2str(sample_t/1000));
+    init_h_temp = str2func(init_h_str_trans);
 end
 %check the param 
 is_inrange = dim_x_temp > 0 && dim_x_temp < DIM_MAX && dim_z_temp > 0 &&...
@@ -744,11 +736,22 @@ msgbox('初始化完成','Success');
 islegal_param = 1;
 dim_x = dim_x_temp;
 dim_z = dim_z_temp;
+sample_t = sample_t_temp;
 init_x = init_x_temp;
 init_p = init_p_temp;
 init_q = init_q_temp;
 init_r = init_r_temp;
 init_f = init_f_temp;
+init_f_str = init_f_temp_str;
 init_h = init_h_temp;
+init_h_str = init_h_temp_str;
 transition_style = transition_style_temp;
 observe_style = observe_style_temp;
+set(handles.edit_dim_x,'string',num2str(dim_x));
+set(handles.edit_dim_z,'string',num2str(dim_z));
+set(handles.edit_init_x,'string',num2str(init_x'));
+set(handles.edit_init_p,'string',num2str(init_p));
+set(handles.edit_init_q,'string',num2str(init_q));
+set(handles.edit_init_r,'string',num2str(init_r));
+set(handles.edit_transition,'string',init_f_str);
+set(handles.edit_observe,'string',init_h_str);
