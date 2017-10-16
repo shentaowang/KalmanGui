@@ -700,7 +700,7 @@ if strcmp(transition_style_temp,'matrix')
 else
     init_f_temp_str = textscan(fp,'%s[^observe_style]','HeaderLines',3);
     init_f_temp_str = init_f_temp_str{:}{:};
-    init_f_str_trans = strrep(init_f_temp_str,'sat',num2str(sample_t/1000));
+    init_f_str_trans = strrep(init_f_temp_str,'sat',num2str(double(sample_t_temp)/1000));
     init_f_temp = str2func(init_f_str_trans);
     observe_style_temp = textscan(fp,'%s[^init_h]','HeaderLines',3);
 end
@@ -717,7 +717,7 @@ if strcmp(observe_style_temp,'matrix')
 else
     init_h_temp_str = textscan(fp,'%s[^end]','HeaderLines',3);
     init_h_temp_str = init_h_temp_str{:}{:};
-    init_h_str_trans = strrep(init_h_temp_str,'sat',num2str(sample_t/1000));
+    init_h_str_trans = strrep(init_h_temp_str,'sat',num2str(double(sample_t_temp)/1000));
     init_h_temp = str2func(init_h_str_trans);
 end
 %check the param 
