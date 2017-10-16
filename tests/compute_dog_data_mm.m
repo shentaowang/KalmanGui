@@ -1,5 +1,5 @@
-observe_file = 'mm_observe_01.txt';
-true_file = 'mm_true_01.txt';
+observe_file = 'mm_observe_02.txt';
+true_file = 'mm_true_02.txt';
 
 dim_data = 50;
 dim_x = 2;
@@ -14,11 +14,11 @@ xs = zeros(dim_data,dim_x);
 zs = zeros(dim_data,dim_z);
 
 for k = 1:dim_data
-    v = vel + normrnd(0,1) * p_std;
+    v = vel + wgn(1,1,0) * p_std;
     %dt == 1
     x = x + v;
     xs(k,:) = [x v]';
-    zs(k,:) = x + normrnd(0,1) * z_std;
+    zs(k,:) = x + wgn(1,1,0) * z_std;
 end
 
 fp = fopen(observe_file,'w');
