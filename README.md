@@ -75,7 +75,3 @@ __建议操作顺序：输入参数维度-->输入参数-->输入模型__
 1. Python的kalman滤波包：[filterpy](https://github.com/rlabbe/filterpy "悬停显示")
 
 使用此第三方包验证滤波方法准确性
-
-欢迎交流:blush:
-
-作者邮箱：18362927193@163.com
