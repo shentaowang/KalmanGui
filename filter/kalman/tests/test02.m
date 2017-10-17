@@ -53,3 +53,6 @@ end
 result_data = filtering_data;
 
 radar_test_ukf_mse = sum(sum(result_data-radar_groudtruth).^2)/data_scale;
+data_gap = result_data-radar_groudtruth;
+mse = data_gap(1,:) * data_gap(1,:)'/data_scale;
+fprintf('MSE between filtered an true dim:%d is:%f\n',1,mse);

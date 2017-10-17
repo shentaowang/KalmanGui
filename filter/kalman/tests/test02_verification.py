@@ -2,8 +2,8 @@ from filterpy.kalman import UnscentedKalmanFilter as UKF
 from filterpy.kalman import MerweScaledSigmaPoints
 import numpy as np 
 
-observe_file = 'ff_observe_01.txt';
-true_file = 'ff_true_01.txt'
+observe_file = 'data02_observe.txt';
+true_file = 'data02_true.txt'
 
 fp = open(observe_file,'r')
 observe_data = []

@@ -1,12 +1,21 @@
 data01.txt
-dim_x = 0
-dim_z = 0
-init_P = 1e-5;
-init_H = 1;
-init_F = 1;
-init_R = 1e-5;
-init_Q = 1e-6;	
+dim_x = 2
+dim_z = 1
+init_p = [500 0;0 49];
+init_h = [1 0];
+init_f = [1 1;0 1];
+init_r = 10;
+init_q = [0.01 0;0 0.01];
+init_x = [0; 0]
 
 test02.txt
-the data for radar
-is noliner system
+for test02_reduce
+sample_t = 106
+dim_x = 4
+dim_z = 3
+init_x = [8.46642 0 0 0];
+init_p = [1 0 0 0;0 1 0 0;0 0 1 0;0 0 0 1]
+init_q = [0 0 0 0;0 0 0 0;0 0 0 0.09 0;0 0 0 0.09]
+init_r = [0.09 0 0;0 0.009 0;0 0 0.09]
+init_f = @(x)[x(1)+sat*x(3);x(2)+sat*x(4);x(3);x(4)]
+init_h = @(x)[sqrt(x(1)^2+x(2)^2);atan(x(2)/x(1));(x(1)*x(3)+x(2)*x(4))/(x(1)^2+x(2)^2)]

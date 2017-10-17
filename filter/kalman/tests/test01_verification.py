@@ -2,8 +2,8 @@ import numpy as np
 from filterpy.kalman import KalmanFilter
 from filterpy.common import Q_discrete_white_noise 
 
-file_observe = 'mm_observe_01.txt'
-file_true = 'mm_true_01.txt'
+file_observe = 'data01_observe.txt'
+file_true = 'data01_true.txt'
 
 f = open(file_observe,'r')
 
@@ -73,7 +73,8 @@ def run(x0=(0.,0.), P=500, R=0, Q=0, dt=1.0,
     return xs, cov
 
 P = np.diag([500., 49.])
-Ms, Ps = run(count=50, R=10, Q=0.01, P=P, zs=observe_data)
+Q = np.diag([0.01,0.01])
+Ms, Ps = run(count=50, R=10, Q=Q, P=P, zs=observe_data)
 
 print(Ms.shape)
 
