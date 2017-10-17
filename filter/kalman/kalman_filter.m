@@ -45,6 +45,7 @@ filtering_xs = zeros(dim_x, dim_data);
 for k=1:dim_data
     mPpre = mF * mP * mF' + mQ;
     mK = mPpre * mH' / (mH * mPpre * mH' + mR);
+    mP = (eye(dim_x,dim_x)-mK*mH)*mPpre;
     vXpre = mF * vX;
     vX = vXpre + mK * (mZs(:,k) - mH * vXpre);
     filtering_xs(:,k) = vX;

@@ -1,5 +1,5 @@
-observe_file = 'mm_observe_02.txt';
-true_file = 'mm_true_02.txt';
+observe_file = 'mm_observe_01.txt';
+true_file = 'mm_true_01.txt';
 
 dim_data = 50;
 dim_x = 2;
@@ -23,16 +23,20 @@ end
 
 fp = fopen(observe_file,'w');
 for k = 1:dim_data
-    for m = 1:dim_z;
-        fprintf(fp,'%6f\t',zs(k,m));
+    fprintf(fp,'%6f',zs(k,1));
+    for m = 2:dim_z;
+        fprintf(fp,'\t');
+        fprintf(fp,'%6f',zs(k,m));
     end
     fprintf(fp,'\r\n');
 end
 
 fp = fopen(true_file,'w');
 for k = 1:dim_data
-    for m = 1:dim_x;
-        fprintf(fp,'%6f\t',xs(k,m));
+    fprintf(fp,'%6f',xs(k,1));
+    for m = 2:dim_x;
+        fprintf(fp,'\t');
+        fprintf(fp,'%6f',xs(k,m));
     end
     fprintf(fp,'\r\n');
 end
