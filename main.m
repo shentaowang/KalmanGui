@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 12-Oct-2017 20:31:21
+% Last Modified by GUIDE v2.5 17-Oct-2017 15:31:26
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -218,19 +218,53 @@ global observe_style;
 dim_data = size(filtered_x,2);
 x_zoom = 1.3;
 dim_show = get(handles.popupmenu_showlist,'value');
+range_min = get(handles.edit_range_min,'string');
+range_min = str2double(range_min);
+range_max = get(handles.edit_range_max,'string');
+range_max = str2double(range_max);
+if range_min > range_max
+    temp = range_max;
+    range_max = range_min;
+    range_min = temp;
+end
+if range_max > dim_data
+    button = questdlg('超过数据点最大范围！是否只显示最大并继续','问题提示','yes','no','yes');
+    if strcmp(button,'yes')
+            range_max = dim_data;
+    set(handles.edit_range_max,'string',num2str(range_max))
+    else
+        return;
+    end
+end
+%check if need to show part mse
+is_range_change = 0;
+if range_min==0 && range_max ==0
+    plot_x = 1:dim_data;
+    range_min = 1;
+    range_max = dim_data;
+else
+    plot_x = range_min:range_max;
+    is_range_change = 1;
+end
+%start plot
 if islegal_param && ~isempty(filtered_x)
     sel = get(handles.popupmenu_showmethod,'value');
     switch sel
         case 1
-            plot_x = 1:dim_data;
+            if range_min==0 && range_max ==0
+                plot_x = 1:dim_data;
+                range_min = 1;
+                range_max = dim_data;
+            else
+                plot_x = range_min:range_max;
+            end
             axes(handles.axes_showcompare);
-            plot(plot_x,filtered_x(dim_show,:));
-            xlim([0 dim_data*x_zoom]);
+            plot(plot_x,filtered_x(dim_show,range_min:range_max));
+            xlim([range_min range_max*x_zoom]);
             xlabel('数据点');
             ylabel('数据值');
             legend('滤波后数据');
         case 2
-            plot_x = 1:dim_data;
             isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
                 size(filtered_x,1) && size(compare_data,2) == dim_data);
             if isempty(compare_data)
@@ -239,17 +273,27 @@ if islegal_param && ~isempty(filtered_x)
                 msgbox('滤波后数据和真实数据不匹配','Error','error');
             elseif ~isempty(compare_data)
                 axes(handles.axes_showcompare);
-                plot(plot_x,filtered_x(dim_show,:),plot_x,compare_data(dim_show,:),'*');
-                data_gap = filtered_x(dim_show,:)-compare_data(dim_show,:);
-                mse = sum(data_gap.*data_gap)/size(compare_data,2);
-                str_mse = ['MSE:',num2str(mse)];
-                xlim([0 dim_data*x_zoom]);
+                plot(plot_x,filtered_x(dim_show,range_min:range_max),...
+                    plot_x,compare_data(dim_show,range_min:range_max),'*');
+                xlim([range_min-1 range_max*x_zoom]);
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据','真实数据');
                 x_lim = get(handles.axes_showcompare,'XLim');
                 y_lim = get(handles.axes_showcompare,'YLim');
-                text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse);
+                data_gap = filtered_x(dim_show,:)-compare_data(dim_show,:);
+                mse_all = sum(data_gap.*data_gap)/size(compare_data,2);
+                str_mse_all = ['AllMse:',num2str(mse_all)];
+                text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,...
+                    y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse_all);
+                if is_range_change
+                    data_gap = filtered_x(dim_show,range_min:range_max)-...
+                        compare_data(dim_show,range_min:range_max);
+                    mse_part = data_gap * data_gap'/(range_max-range_min+1);
+                    str_mse_part = ['PartMse:',num2str(mse_part)];
+                    text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,...
+                        y_lim(2)-(y_lim(2)-y_lim(1))*0.20,str_mse_part);
+                end
             end
         case 3
             if strcmp(observe_style,'matrix')
@@ -260,20 +304,30 @@ if islegal_param && ~isempty(filtered_x)
                     trans_filtered_x(:,k) = init_h(filtered_x(:,k));
                 end
             end
-            plot_x = 1:dim_data;
-            plot(plot_x,trans_filtered_x(dim_show,:),plot_x,observe_data(dim_show,:),'*');
-            data_gap = trans_filtered_x(dim_show,:)-observe_data(dim_show,:);
-            mse = sum(data_gap.*data_gap)/size(observe_data,2);
-            str_mse = ['MSE:',num2str(mse)];
-            xlim([0 dim_data*x_zoom]);
+            plot_x = range_min:range_max;
+            plot(plot_x,trans_filtered_x(dim_show,range_min:range_max),...
+                plot_x,observe_data(dim_show,range_min:range_max),'*');
+            xlim([range_min range_max*x_zoom]);
             xlabel('数据点');
             ylabel('数据值');
             legend('滤波后数据','观测数据');
             x_lim = get(handles.axes_showcompare,'XLim');
             y_lim = get(handles.axes_showcompare,'YLim');
-            text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse);
+            data_gap = trans_filtered_x(dim_show,:)-observe_data(dim_show,:);
+            mse_all = sum(data_gap.*data_gap)/size(observe_data,2);
+            str_mse_all = ['MSE:',num2str(mse_all)];
+            text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,...
+                y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse_all);
+            if is_range_change
+                data_gap = trans_filtered_x(dim_show,range_min:range_max)-...
+                    observe_data(dim_show,range_min:range_max);
+                mse_part = data_gap * data_gap'/(range_max-range_min+1);
+                str_mse_part = ['MSE:',num2str(mse_part)];
+                text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,...
+                    y_lim(2)-(y_lim(2)-y_lim(1))*0.20,str_mse_part);
+            end
         case 4
-            plot_x = 1:dim_data;
+            plot_x = range_min:range_max;
             isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
                 size(filtered_x,1) && size(compare_data,2) == dim_data);
             if isempty(compare_data)
@@ -293,18 +347,19 @@ if islegal_param && ~isempty(filtered_x)
                         trans_compare(:,k) = init_h(compare_data(:,k));
                     end
                 end
-                plot(plot_x,trans_filtered_x(dim_show,:),plot_x,observe_data(dim_show,:),'*',...
-                    plot_x,trans_compare(dim_show,:),'+');
-                data_gap = trans_filtered_x(dim_show,:)-observe_data(dim_show,:);
-                mse = sum(data_gap.*data_gap)/size(observe_data,2);
-                str_mse_filter_observe = num2str(mse);
-                data_gap = trans_filtered_x(dim_show,:)-trans_compare(dim_show,:);
-                mse = sum(data_gap.*data_gap)/size(observe_data,2);
-                str_mse_filter_true = num2str(mse);
-                xlim([0 dim_data*x_zoom]);
+                plot(plot_x,trans_filtered_x(dim_show,range_min:range_max),...
+                    plot_x,observe_data(dim_show,range_min:range_max),'*',...
+                    plot_x,trans_compare(dim_show,range_min:range_max),'+');
+                xlim([range_min-1 range_max*x_zoom]);
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据(1)','观测数据(2)','真实数据(3)');
+                data_gap = trans_filtered_x(dim_show,:)-observe_data(dim_show,:);
+                mse_all = sum(data_gap.*data_gap)/size(observe_data,2);
+                str_mse_filter_observe = num2str(mse_all);
+                data_gap = trans_filtered_x(dim_show,:)-trans_compare(dim_show,:);
+                mse_all = sum(data_gap.*data_gap)/size(observe_data,2);
+                str_mse_filter_true = num2str(mse_all);
                 x_lim = get(handles.axes_showcompare,'XLim');
                 y_lim = get(handles.axes_showcompare,'YLim');
                 x_pos = x_lim(1)+(x_lim(2)-x_lim(1))*0.8;
@@ -576,3 +631,69 @@ end
 
 
 function uipanel6_CreateFcn(hObject, eventdata, handles)
+
+
+function edit_range_min_Callback(hObject, eventdata, handles)
+range_min = get(hObject,'string');
+try
+    range_min = str2double(range_min);
+catch
+    range_min = 0;
+    set(hObject,'string',num2str(range_min));
+    msgbox('请输入正整数','Error','error');
+    return;
+end
+if isnan(range_min) || range_min <= 0
+    range_min = 0;
+    set(hObject,'string',num2str(range_min));
+    msgbox('请输正入整数','Error','error');
+    return;
+end
+
+
+
+if range_min ~= floor(range_min)
+    range_min = floor(range_min);
+end
+set(hObject,'string',num2str(range_min));
+
+
+function edit_range_min_CreateFcn(hObject, eventdata, handles)
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+function edit_range_max_Callback(hObject, eventdata, handles)
+range_max = get(hObject,'string');
+try
+    range_max = str2double(range_max);
+catch
+    range_max = 0;
+    set(hObject,'string',num2str(range_max));
+    msgbox('请输入正整数','Error','error');
+    return;
+end
+if isnan(range_max) || range_max <= 0
+    range_max = 0;
+    set(hObject,'string',num2str(range_max));
+    msgbox('请输入正整数','Error','error');
+    return;
+end
+
+if range_max ~= floor(range_max)
+    range_max = floor(range_max);
+end
+set(hObject,'string',num2str(range_max));
+
+
+function edit_range_max_CreateFcn(hObject, eventdata, handles)
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
