@@ -51,6 +51,10 @@ handles.output = hObject;
 %add the path
 root_path = '../KalmanGui';
 addpath(genpath(root_path));
+%change the position
+h = get(gcf,'Position');
+h = [ 20 15 h(3:4)];
+set(gcf,'Position',h);
 %define the global variable
 %need to add the explain for variable
 global observe_data;
@@ -230,8 +234,8 @@ end
 if range_max > dim_data
     button = questdlg('超过数据点最大范围！是否只显示最大并继续','问题提示','yes','no','yes');
     if strcmp(button,'yes')
-            range_max = dim_data;
-    set(handles.edit_range_max,'string',num2str(range_max))
+        range_max = dim_data;
+        set(handles.edit_range_max,'string',num2str(range_max))
     else
         return;
     end
@@ -259,6 +263,8 @@ if islegal_param && ~isempty(filtered_x)
                 plot_x = range_min:range_max;
             end
             axes(handles.axes_showcompare);
+            scrsz = get(groot,'ScreenSize');
+            figure('Name','主绘图区','NumberTitle','on','Position',[scrsz(3)/3 scrsz(4)/3 scrsz(3)/2 scrsz(4)/2]);
             plot(plot_x,filtered_x(dim_show,range_min:range_max));
             xlim([range_min range_max*x_zoom]);
             xlabel('数据点');
@@ -273,6 +279,8 @@ if islegal_param && ~isempty(filtered_x)
                 msgbox('滤波后数据和真实数据不匹配','Error','error');
             elseif ~isempty(compare_data)
                 axes(handles.axes_showcompare);
+                scrsz = get(groot,'ScreenSize');
+                figure('Name','主绘图区','NumberTitle','on','Position',[scrsz(3)/3 scrsz(4)/3 scrsz(3)/2 scrsz(4)/2]);
                 plot(plot_x,filtered_x(dim_show,range_min:range_max),...
                     plot_x,compare_data(dim_show,range_min:range_max),'*');
                 xlim([range_min-1 range_max*x_zoom]);
@@ -305,6 +313,8 @@ if islegal_param && ~isempty(filtered_x)
                 end
             end
             plot_x = range_min:range_max;
+            scrsz = get(groot,'ScreenSize');
+            figure('Name','主绘图区','NumberTitle','on','Position',[scrsz(3)/3 scrsz(4)/3 scrsz(3)/2 scrsz(4)/2]);
             plot(plot_x,trans_filtered_x(dim_show,range_min:range_max),...
                 plot_x,observe_data(dim_show,range_min:range_max),'*');
             xlim([range_min range_max*x_zoom]);
@@ -336,6 +346,8 @@ if islegal_param && ~isempty(filtered_x)
                 msgbox('滤波后数据和真实数据不匹配','Error','error');
             elseif ~isempty(compare_data)
                 axes(handles.axes_showcompare);
+                scrsz = get(groot,'ScreenSize');
+                figure('Name','主绘图区','NumberTitle','on','Position',[scrsz(3)/3 scrsz(4)/3 scrsz(3)/2 scrsz(4)/2]);
                 if strcmp(observe_style,'matrix')
                     trans_filtered_x = init_h * filtered_x;
                     trans_compare = init_h * compare_data;
@@ -373,7 +385,7 @@ if islegal_param && ~isempty(filtered_x)
                 text(x_pos,y_pos,str_mse_filter_true);
             end
         otherwise
-                msgbox('存在一些问题,开发者没考虑到','Error','error');
+            msgbox('存在一些问题,开发者没考虑到','Error','error');
     end
 end
 
@@ -457,7 +469,7 @@ if islegal_param
                 set(handles.popupmenu_showlist,'string',show_list{1,1},'value',1);
             end
         otherwise
-                msgbox('存在一些问题,开发者没考虑到','Error','error');
+            msgbox('存在一些问题,开发者没考虑到','Error','error');
     end
 end
 
