@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 17-Oct-2017 15:31:26
+% Last Modified by GUIDE v2.5 22-Oct-2017 10:11:54
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -402,7 +402,6 @@ if islegal_param
     end
 end
 
-function axes_showcompare_CreateFcn(hObject, eventdata, handles)
 
 function popupmenu_showmethod_Callback(hObject, eventdata, handles)
 global islegal_param;
@@ -575,20 +574,6 @@ mse_filter_true = sum(data_gap.*data_gap)./size(observe_data,2);
 fprintf(fp,'滤波后数据和测量数据的MSE值(按观测变量数据维度显示)\n');
 fprintf(fp,[num2str(mse_filter_true),'\n']);
 
-function menu_output_figure_Callback(hObject, eventdata, handles)
-[filename,pathname]=uiputfile({'*.bmp';},'保存图片','Undefined.bmp');
-if ~isequal(filename,0)
-    str = [pathname filename];
-else
-    return;
-end;
-%     px=getframe(handles.axes_showcompare);
-try
-    saveas(handles.axes_showcompare,str,'bmp');
-    %     imwrite(px.cdata,str,'bmp');
-catch
-    disp('保存失败');
-end
 
 function menu_import_observedata_Callback(hObject, eventdata, handles)
 global observe_data;
@@ -695,4 +680,82 @@ function edit_range_max_CreateFcn(hObject, eventdata, handles)
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
+end
+
+
+function uitable_analyse_CellEditCallback(hObject, eventdata, handles)
+
+
+function uitable_analyse_CreateFcn(hObject, eventdata, handles)
+
+
+function pushbutton_analyse_Callback(hObject, eventdata, handles)
+global observe_data;
+global compare_data;
+global filtered_x;
+global dim_z;
+global islegal_param
+global init_h
+global observe_style
+range_min = get(handles.edit_range_min,'string');
+range_min = str2double(range_min);
+range_max = get(handles.edit_range_max,'string');
+range_max = str2double(range_max);
+if islegal_param && ~isempty(filtered_x)
+    dim_data = size(filtered_x,2);
+    if range_min > range_max
+        temp = range_max;
+        range_max = range_min;
+        range_min = temp;
+    end
+    if range_max > dim_data
+        button = questdlg('超过数据点最大范围！是否只显示最大并继续','问题提示','yes','no','yes');
+        if strcmp(button,'yes')
+            range_max = dim_data;
+            set(handles.edit_range_max,'string',num2str(range_max))
+        else
+            return;
+        end
+    end
+    %check if need to show part mse
+    is_range_change = 0;
+    if range_min~=0 && range_max ~=0
+        is_range_change = 1;
+    end
+    isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
+        size(filtered_x,1) && size(compare_data,2) == dim_data);
+    if isempty(compare_data)
+        msgbox('真实数据未输入','Error','error');
+    elseif isnot_match
+        msgbox('滤波后数据和真实数据不匹配','Error','error');
+    elseif ~isempty(compare_data)
+        row_area = {'观测和真实MSE';'滤波和真实MSE';...
+            ['区间[' num2str(range_min) ',' num2str(range_max) ']观测和真实MSE'];...
+            ['区间[' num2str(range_min) ',' num2str(range_max) ']滤波和真实MSE']};
+        column_area = num2cell(1:dim_z);
+        show_data = zeros(4,dim_z);
+        if strcmp(observe_style,'matrix')
+            trans_filtered_x = init_h * filtered_x;
+            trans_compare = init_h * compare_data;
+        else
+            trans_filtered_x = zeros(dim_z,dim_data);
+            trans_compare = zeros(dim_z,dim_data);
+            for k = 1:size(trans_filtered_x,2)
+                trans_filtered_x(:,k) = init_h(filtered_x(:,k));
+                trans_compare(:,k) = init_h(compare_data(:,k));
+            end
+        end
+        gap_observe_compare = trans_compare - observe_data;
+        gap_observe_filtered = trans_filtered_x - observe_data;
+        show_data(1,:) = sum(gap_observe_compare'.^2)/dim_data;
+        show_data(2,:) = sum(gap_observe_filtered'.^2)/dim_data;
+        if is_range_change
+            gap_observe_compare = gap_observe_compare(:,range_min:range_max);
+            gap_observe_filtered = gap_observe_filtered(:,range_min:range_max);
+            show_data(3,:) = sum(gap_observe_compare'.^2)/(range_max-range_min+1);
+            show_data(4,:) = sum(gap_observe_filtered'.^2)/(range_max-range_min+1);
+        end
+        set(handles.uitable_analyse,'RowName',row_area,'ColumnName',column_area,...
+            'data',show_data);
+    end
 end

@@ -52,6 +52,11 @@ function init_param_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to init_param (see VARARGIN)
 
+%change the position
+h = get(gcf,'Position');
+h = [ 20 20 h(3:4)];
+set(gcf,'Position',h);
+
 % Choose default command line output for init_param
 global DIM_MAX; DIM_MAX = 10;
 global SAMPLE_T_MAX; SAMPLE_T_MAX = 10000;
