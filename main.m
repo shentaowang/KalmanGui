@@ -496,43 +496,25 @@ for k=1:dim_data
 end
 
 function menu_output_analyse_Callback(hObject, eventdata, handles)
-global filtered_x;
-global observe_data;
-global compare_data;
-global init_h;
-global observe_style
-
-is_match = size(compare_data,1) == size(filtered_x,1) &&...
-    size(compare_data,1) == size(filtered_x,1);
-[f_name, p_name ] = uiputfile({'*.txt';},'导出分析结果','Undefined.txt');
+[f_name, p_name ] = uiputfile({'*.csv';},'导出分析结果','Undefined.csv');
 if isequal(p_name,0) || isequal(f_name,0)
     return;
 end
 full_name = fullfile(p_name, f_name);
-fp = fopen(full_name,'w');
-if is_match
-    data_gap = (compare_data - filtered_x)';
-    mse_filter_true = sum(data_gap.*data_gap)./size(data_gap,1);
-    fprintf(fp,'滤波后数据和真实数据的MSE值(按状态变量维度显示)\n');
-    fprintf(fp,[num2str(mse_filter_true),'\n']);
-else
-    fprintf(fp,'导入真实数据不匹配或者未导入\n');
-    fprintf(fp,'\n');
-end
-trans_filtered_x = zeros(size(observe_data,1),size(observe_data,2));
-if strcmp(observe_style,'matrix')
-    for k=1:size(filtered_x,2)
-        trans_filtered_x(:,k) = init_h * filtered_x(:,k);
-    end
-else
-    for k=1:size(filtered_x,2)
-        trans_filtered_x(:,k) = init_h(filtered_x(:,k));
-    end
-end
-data_gap = (trans_filtered_x - observe_data)';
-mse_filter_true = sum(data_gap.*data_gap)./size(observe_data,2);
-fprintf(fp,'滤波后数据和测量数据的MSE值(按观测变量数据维度显示)\n');
-fprintf(fp,[num2str(mse_filter_true),'\n']);
+data = get(handles.uitable_analyse,'data');
+tCell = num2cell(data);
+ColNamesCell = get(handles.uitable_analyse,'ColumnName');
+RowNamesCell = get(handles.uitable_analyse,'RowName');
+RowNamesCell = ['数据维度';RowNamesCell];
+tCell = [ColNamesCell';tCell];
+tCell = [RowNamesCell tCell];
+
+Fun = @(x)( num2str(x) );
+tCell = cellfun( Fun,tCell, 'UniformOutput', false);
+
+T = cell2table(tCell);
+writetable(T,full_name,'WriteVariableNames',false);
+% csvwrite(full_name,data);
 
 
 function menu_import_observedata_Callback(hObject, eventdata, handles)
