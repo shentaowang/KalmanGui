@@ -22,7 +22,7 @@ function varargout = init_param(varargin)
 
 % Edit the above text to modify the response to help init_param
 
-% Last Modified by GUIDE v2.5 15-Oct-2017 20:35:39
+% Last Modified by GUIDE v2.5 22-Oct-2017 13:46:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -764,3 +764,13 @@ set(handles.edit_init_q,'string',num2str(init_q));
 set(handles.edit_init_r,'string',num2str(init_r));
 set(handles.edit_transition,'string',init_f_str);
 set(handles.edit_observe,'string',init_h_str);
+
+
+function menu_init_output_UI_Callback(hObject, eventdata, handles)
+[f_name, p_name ] = uiputfile({'*.jpg';},'µ¼³öUI','Undefined.fig');
+if isequal(p_name,0) || isequal(f_name,0)
+    return;
+end
+full_name = fullfile(p_name, f_name);
+FG=getframe(gcf);
+imwrite(FG.cdata,full_name)

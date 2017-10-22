@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 22-Oct-2017 11:22:34
+% Last Modified by GUIDE v2.5 22-Oct-2017 13:56:23
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -147,6 +147,10 @@ global transition_style;
 global observe_style;
 global islegal_param;
 is_match = size(observe_data,1) == dim_z;
+if isempty(observe_data)
+    msgbox('观测数据未导入','Error','error');
+    return;
+end
 if ~islegal_param
     msgbox('参数初始化不合法','Error','error');
     return;
@@ -690,6 +694,9 @@ if islegal_param && ~isempty(filtered_x)
             ['区间[' num2str(range_min) ',' num2str(range_max) ']滤波和真实MSE']};
         column_area = num2cell(1:dim_z);
         show_data = zeros(4,dim_z);
+        for k=1:dim_z
+            column_area{k} = ['维度：' num2str(column_area{k})];
+        end
         if strcmp(observe_style,'matrix')
             trans_filtered_x = init_h * filtered_x;
             trans_compare = init_h * compare_data;
@@ -718,7 +725,7 @@ end
 
 
 function menu_output_fig_image_Callback(hObject, eventdata, handles)
-[f_name, p_name ] = uiputfile({'*.fig';'*.jpg'},'导出图形.fig','Undefined.fig');
+[f_name, p_name ] = uiputfile({'*.fig';'*.jpg'},'导出绘图区域','Undefined.fig');
 if isequal(p_name,0) || isequal(f_name,0)
     return;
 end
@@ -858,3 +865,23 @@ if islegal_param && ~isempty(filtered_x)
             msgbox('保存图形失败','Error','error');
     end
 end
+
+
+function menu_output_UI_Callback(hObject, eventdata, handles)
+[f_name, p_name ] = uiputfile({'*.jpg';},'导出UI','Undefined.fig');
+if isequal(p_name,0) || isequal(f_name,0)
+    return;
+end
+full_name = fullfile(p_name, f_name);
+FG=getframe(gcf);
+imwrite(FG.cdata,full_name)
+
+
+function menu_show_fig_Callback(hObject, eventdata, handles)
+[f_name, p_name] = uigetfile({'*.fig';},'显示fig图');
+%if choose the cancle
+if isequal(p_name,0)
+    return;
+end
+full_name = fullfile(p_name, f_name);
+openfig(full_name,'visible');
