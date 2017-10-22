@@ -53,7 +53,7 @@ root_path = '../KalmanGui';
 addpath(genpath(root_path));
 %change the position
 h = get(gcf,'Position');
-h = [ 20 15 h(3:4)];
+h = [ 20 20 h(3:4)];
 set(gcf,'Position',h);
 %define the global variable
 %need to add the explain for variable
@@ -220,7 +220,6 @@ global islegal_param;
 global init_h;
 global observe_style;
 dim_data = size(filtered_x,2);
-x_zoom = 1.3;
 dim_show = get(handles.popupmenu_showlist,'value');
 range_min = get(handles.edit_range_min,'string');
 range_min = str2double(range_min);
@@ -262,11 +261,15 @@ if islegal_param && ~isempty(filtered_x)
             else
                 plot_x = range_min:range_max;
             end
-            axes(handles.axes_showcompare);
+            %contral the plot area
             scrsz = get(groot,'ScreenSize');
-            figure('Name','主绘图区','NumberTitle','on','Position',[scrsz(3)/3 scrsz(4)/3 scrsz(3)/2 scrsz(4)/2]);
+            plot_area = figure(666);
+            plot_area.Name = '主绘图区';
+            plot_area.NumberTitle = 'off';
+            plot_area.Position = [scrsz(3)/3 scrsz(4)/4 scrsz(3)/2 scrsz(4)/2];
+            %plot the figure
             plot(plot_x,filtered_x(dim_show,range_min:range_max));
-            xlim([range_min range_max*x_zoom]);
+            xlim([range_min-1 range_max+2]);
             xlabel('数据点');
             ylabel('数据值');
             legend('滤波后数据');
@@ -278,29 +281,25 @@ if islegal_param && ~isempty(filtered_x)
             elseif isnot_match
                 msgbox('滤波后数据和真实数据不匹配','Error','error');
             elseif ~isempty(compare_data)
-                axes(handles.axes_showcompare);
                 scrsz = get(groot,'ScreenSize');
-                figure('Name','主绘图区','NumberTitle','on','Position',[scrsz(3)/3 scrsz(4)/3 scrsz(3)/2 scrsz(4)/2]);
+                plot_area = figure(666);
+                plot_area.Name = '主绘图区';
+                plot_area.NumberTitle = 'off';
+                plot_area.Position = [scrsz(3)/3 scrsz(4)/4 scrsz(3)/2 scrsz(4)/2];
                 plot(plot_x,filtered_x(dim_show,range_min:range_max),...
                     plot_x,compare_data(dim_show,range_min:range_max),'*');
-                xlim([range_min-1 range_max*x_zoom]);
+                xlim([range_min-1 range_max+2]);
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据','真实数据');
-                x_lim = get(handles.axes_showcompare,'XLim');
-                y_lim = get(handles.axes_showcompare,'YLim');
                 data_gap = filtered_x(dim_show,:)-compare_data(dim_show,:);
                 mse_all = sum(data_gap.*data_gap)/size(compare_data,2);
                 str_mse_all = ['AllMse:',num2str(mse_all)];
-                text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,...
-                    y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse_all);
                 if is_range_change
                     data_gap = filtered_x(dim_show,range_min:range_max)-...
                         compare_data(dim_show,range_min:range_max);
                     mse_part = data_gap * data_gap'/(range_max-range_min+1);
                     str_mse_part = ['PartMse:',num2str(mse_part)];
-                    text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,...
-                        y_lim(2)-(y_lim(2)-y_lim(1))*0.20,str_mse_part);
                 end
             end
         case 3
@@ -312,29 +311,26 @@ if islegal_param && ~isempty(filtered_x)
                     trans_filtered_x(:,k) = init_h(filtered_x(:,k));
                 end
             end
-            plot_x = range_min:range_max;
             scrsz = get(groot,'ScreenSize');
-            figure('Name','主绘图区','NumberTitle','on','Position',[scrsz(3)/3 scrsz(4)/3 scrsz(3)/2 scrsz(4)/2]);
+            plot_area = figure(666);
+            plot_area.Name = '主绘图区';
+            plot_area.NumberTitle = 'off';
+            plot_area.Position = [scrsz(3)/3 scrsz(4)/4 scrsz(3)/2 scrsz(4)/2];
+            plot_x = range_min:range_max;
             plot(plot_x,trans_filtered_x(dim_show,range_min:range_max),...
                 plot_x,observe_data(dim_show,range_min:range_max),'*');
-            xlim([range_min range_max*x_zoom]);
+            xlim([range_min-1 range_max+2]);
             xlabel('数据点');
             ylabel('数据值');
             legend('滤波后数据','观测数据');
-            x_lim = get(handles.axes_showcompare,'XLim');
-            y_lim = get(handles.axes_showcompare,'YLim');
             data_gap = trans_filtered_x(dim_show,:)-observe_data(dim_show,:);
             mse_all = sum(data_gap.*data_gap)/size(observe_data,2);
             str_mse_all = ['MSE:',num2str(mse_all)];
-            text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,...
-                y_lim(2)-(y_lim(2)-y_lim(1))*0.15,str_mse_all);
             if is_range_change
                 data_gap = trans_filtered_x(dim_show,range_min:range_max)-...
                     observe_data(dim_show,range_min:range_max);
                 mse_part = data_gap * data_gap'/(range_max-range_min+1);
                 str_mse_part = ['MSE:',num2str(mse_part)];
-                text(x_lim(1)+(x_lim(2)-x_lim(1))*0.8,...
-                    y_lim(2)-(y_lim(2)-y_lim(1))*0.20,str_mse_part);
             end
         case 4
             plot_x = range_min:range_max;
@@ -345,9 +341,11 @@ if islegal_param && ~isempty(filtered_x)
             elseif isnot_match
                 msgbox('滤波后数据和真实数据不匹配','Error','error');
             elseif ~isempty(compare_data)
-                axes(handles.axes_showcompare);
                 scrsz = get(groot,'ScreenSize');
-                figure('Name','主绘图区','NumberTitle','on','Position',[scrsz(3)/3 scrsz(4)/3 scrsz(3)/2 scrsz(4)/2]);
+                plot_area = figure(666);
+                plot_area.Name = '主绘图区';
+                plot_area.NumberTitle = 'off';
+                plot_area.Position = [scrsz(3)/3 scrsz(4)/4 scrsz(3)/2 scrsz(4)/2];
                 if strcmp(observe_style,'matrix')
                     trans_filtered_x = init_h * filtered_x;
                     trans_compare = init_h * compare_data;
@@ -362,7 +360,7 @@ if islegal_param && ~isempty(filtered_x)
                 plot(plot_x,trans_filtered_x(dim_show,range_min:range_max),...
                     plot_x,observe_data(dim_show,range_min:range_max),'*',...
                     plot_x,trans_compare(dim_show,range_min:range_max),'+');
-                xlim([range_min-1 range_max*x_zoom]);
+                xlim([range_min-1 range_max+2]);
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据(1)','观测数据(2)','真实数据(3)');
@@ -372,17 +370,6 @@ if islegal_param && ~isempty(filtered_x)
                 data_gap = trans_filtered_x(dim_show,:)-trans_compare(dim_show,:);
                 mse_all = sum(data_gap.*data_gap)/size(observe_data,2);
                 str_mse_filter_true = num2str(mse_all);
-                x_lim = get(handles.axes_showcompare,'XLim');
-                y_lim = get(handles.axes_showcompare,'YLim');
-                x_pos = x_lim(1)+(x_lim(2)-x_lim(1))*0.8;
-                y_pos = y_lim(2)-(y_lim(2)-y_lim(1))*0.16;
-                text(x_pos,y_pos,'(1)和(2)MSE:')
-                y_pos = y_lim(2)-(y_lim(2)-y_lim(1))*0.20;
-                text(x_pos,y_pos,str_mse_filter_observe);
-                y_pos = y_lim(2)-(y_lim(2)-y_lim(1))*0.24;
-                text(x_pos,y_pos,'(1)和(3)MSE:');
-                y_pos = y_lim(2)-(y_lim(2)-y_lim(1))*0.28;
-                text(x_pos,y_pos,str_mse_filter_true);
             end
         otherwise
             msgbox('存在一些问题,开发者没考虑到','Error','error');
