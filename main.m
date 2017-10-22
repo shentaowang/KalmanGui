@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 22-Oct-2017 10:11:54
+% Last Modified by GUIDE v2.5 22-Oct-2017 11:22:34
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -77,6 +77,7 @@ global islegal_param;
 global DIM_MAX; DIM_MAX = 10;
 global SAMPLE_T_MAX; SAMPLE_T_MAX = 10000;
 global dim_show;
+global save_figure;
 dim_show = 1;
 if isempty(islegal_param)
     islegal_param = 0;
@@ -95,6 +96,7 @@ if isempty(islegal_param)
     sample_t = 0;
     transition_style = 'matrix';
     observe_style = 'matrix';
+    save_figure = 0;
 else
     if islegal_param == 0
         init_x = 0;
@@ -110,6 +112,7 @@ else
         sample_t = 0;
         transition_style = 'matrix';
         observe_style = 'matrix';
+        save_figure = 0;
     end
 end
 % Update handles structure
@@ -219,6 +222,7 @@ global compare_data;
 global islegal_param;
 global init_h;
 global observe_style;
+global save_figure;
 dim_data = size(filtered_x,2);
 dim_show = get(handles.popupmenu_showlist,'value');
 range_min = get(handles.edit_range_min,'string');
@@ -239,40 +243,27 @@ if range_max > dim_data
         return;
     end
 end
-%check if need to show part mse
-is_range_change = 0;
-if range_min==0 && range_max ==0
-    plot_x = 1:dim_data;
-    range_min = 1;
-    range_max = dim_data;
-else
-    plot_x = range_min:range_max;
-    is_range_change = 1;
-end
 %start plot
 if islegal_param && ~isempty(filtered_x)
     sel = get(handles.popupmenu_showmethod,'value');
+    if range_min==0 && range_max ==0
+        plot_x = 1:dim_data;
+        range_min = 1;
+        range_max = dim_data;
+    else
+        plot_x = range_min:range_max;
+    end
     switch sel
         case 1
-            if range_min==0 && range_max ==0
-                plot_x = 1:dim_data;
-                range_min = 1;
-                range_max = dim_data;
-            else
-                plot_x = range_min:range_max;
-            end
-            %contral the plot area
-            scrsz = get(groot,'ScreenSize');
-            plot_area = figure(666);
-            plot_area.Name = '主绘图区';
-            plot_area.NumberTitle = 'off';
-            plot_area.Position = [scrsz(3)/3 scrsz(4)/4 scrsz(3)/2 scrsz(4)/2];
+            %contral the plot are
+            axes(handles.axes_main_show);
             %plot the figure
             plot(plot_x,filtered_x(dim_show,range_min:range_max));
             xlim([range_min-1 range_max+2]);
             xlabel('数据点');
             ylabel('数据值');
             legend('滤波后数据');
+            save_figure = 1;
         case 2
             isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
                 size(filtered_x,1) && size(compare_data,2) == dim_data);
@@ -281,26 +272,14 @@ if islegal_param && ~isempty(filtered_x)
             elseif isnot_match
                 msgbox('滤波后数据和真实数据不匹配','Error','error');
             elseif ~isempty(compare_data)
-                scrsz = get(groot,'ScreenSize');
-                plot_area = figure(666);
-                plot_area.Name = '主绘图区';
-                plot_area.NumberTitle = 'off';
-                plot_area.Position = [scrsz(3)/3 scrsz(4)/4 scrsz(3)/2 scrsz(4)/2];
+                axes(handles.axes_main_show);
                 plot(plot_x,filtered_x(dim_show,range_min:range_max),...
                     plot_x,compare_data(dim_show,range_min:range_max),'*');
                 xlim([range_min-1 range_max+2]);
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据','真实数据');
-                data_gap = filtered_x(dim_show,:)-compare_data(dim_show,:);
-                mse_all = sum(data_gap.*data_gap)/size(compare_data,2);
-                str_mse_all = ['AllMse:',num2str(mse_all)];
-                if is_range_change
-                    data_gap = filtered_x(dim_show,range_min:range_max)-...
-                        compare_data(dim_show,range_min:range_max);
-                    mse_part = data_gap * data_gap'/(range_max-range_min+1);
-                    str_mse_part = ['PartMse:',num2str(mse_part)];
-                end
+                save_figure = 2;
             end
         case 3
             if strcmp(observe_style,'matrix')
@@ -311,29 +290,15 @@ if islegal_param && ~isempty(filtered_x)
                     trans_filtered_x(:,k) = init_h(filtered_x(:,k));
                 end
             end
-            scrsz = get(groot,'ScreenSize');
-            plot_area = figure(666);
-            plot_area.Name = '主绘图区';
-            plot_area.NumberTitle = 'off';
-            plot_area.Position = [scrsz(3)/3 scrsz(4)/4 scrsz(3)/2 scrsz(4)/2];
-            plot_x = range_min:range_max;
+            axes(handles.axes_main_show);
             plot(plot_x,trans_filtered_x(dim_show,range_min:range_max),...
                 plot_x,observe_data(dim_show,range_min:range_max),'*');
             xlim([range_min-1 range_max+2]);
             xlabel('数据点');
             ylabel('数据值');
             legend('滤波后数据','观测数据');
-            data_gap = trans_filtered_x(dim_show,:)-observe_data(dim_show,:);
-            mse_all = sum(data_gap.*data_gap)/size(observe_data,2);
-            str_mse_all = ['MSE:',num2str(mse_all)];
-            if is_range_change
-                data_gap = trans_filtered_x(dim_show,range_min:range_max)-...
-                    observe_data(dim_show,range_min:range_max);
-                mse_part = data_gap * data_gap'/(range_max-range_min+1);
-                str_mse_part = ['MSE:',num2str(mse_part)];
-            end
+            save_figure = 3;
         case 4
-            plot_x = range_min:range_max;
             isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
                 size(filtered_x,1) && size(compare_data,2) == dim_data);
             if isempty(compare_data)
@@ -341,11 +306,7 @@ if islegal_param && ~isempty(filtered_x)
             elseif isnot_match
                 msgbox('滤波后数据和真实数据不匹配','Error','error');
             elseif ~isempty(compare_data)
-                scrsz = get(groot,'ScreenSize');
-                plot_area = figure(666);
-                plot_area.Name = '主绘图区';
-                plot_area.NumberTitle = 'off';
-                plot_area.Position = [scrsz(3)/3 scrsz(4)/4 scrsz(3)/2 scrsz(4)/2];
+                axes(handles.axes_main_show);
                 if strcmp(observe_style,'matrix')
                     trans_filtered_x = init_h * filtered_x;
                     trans_compare = init_h * compare_data;
@@ -364,12 +325,7 @@ if islegal_param && ~isempty(filtered_x)
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据(1)','观测数据(2)','真实数据(3)');
-                data_gap = trans_filtered_x(dim_show,:)-observe_data(dim_show,:);
-                mse_all = sum(data_gap.*data_gap)/size(observe_data,2);
-                str_mse_filter_observe = num2str(mse_all);
-                data_gap = trans_filtered_x(dim_show,:)-trans_compare(dim_show,:);
-                mse_all = sum(data_gap.*data_gap)/size(observe_data,2);
-                str_mse_filter_true = num2str(mse_all);
+                save_figure = 4;
             end
         otherwise
             msgbox('存在一些问题,开发者没考虑到','Error','error');
@@ -577,7 +533,7 @@ fprintf(fp,[num2str(mse_filter_true),'\n']);
 
 function menu_import_observedata_Callback(hObject, eventdata, handles)
 global observe_data;
-[f_name, p_name] = uigetfile('*.txt');
+[f_name, p_name] = uigetfile({'*.txt';},'导人观测数据');
 %if choose the cancle
 if isequal(p_name,0)
     return;
@@ -592,7 +548,7 @@ end
 
 function menu_import_truedata_Callback(hObject, eventdata, handles)
 global compare_data;
-[f_name, p_name] = uigetfile('*.txt');
+[f_name, p_name] = uigetfile({'*.txt';},'导人真实数据');
 %if choose the cancle
 if isequal(p_name,0)
     return;
@@ -757,5 +713,148 @@ if islegal_param && ~isempty(filtered_x)
         end
         set(handles.uitable_analyse,'RowName',row_area,'ColumnName',column_area,...
             'data',show_data);
+    end
+end
+
+
+function menu_output_fig_image_Callback(hObject, eventdata, handles)
+[f_name, p_name ] = uiputfile({'*.fig';'*.jpg'},'导出图形.fig','Undefined.fig');
+if isequal(p_name,0) || isequal(f_name,0)
+    return;
+end
+full_name = fullfile(p_name, f_name);
+save_multi_figure(full_name,handles);
+
+
+function save_multi_figure(file,handles)
+global dim_z;
+global filtered_x;
+global observe_data;
+global compare_data;
+global islegal_param;
+global init_h;
+global observe_style;
+global save_figure;
+dim_data = size(filtered_x,2);
+dim_show = get(handles.popupmenu_showlist,'value');
+range_min = get(handles.edit_range_min,'string');
+range_min = str2double(range_min);
+range_max = get(handles.edit_range_max,'string');
+range_max = str2double(range_max);
+if range_min > range_max
+    temp = range_max;
+    range_max = range_min;
+    range_min = temp;
+end
+if range_max > dim_data
+    button = questdlg('超过数据点最大范围！是否只保存最大并继续','问题提示','yes','no','yes');
+    if strcmp(button,'yes')
+        range_max = dim_data;
+        set(handles.edit_range_max,'string',num2str(range_max))
+    else
+        return;
+    end
+end
+%start plot
+if islegal_param && ~isempty(filtered_x)
+    if range_min==0 && range_max ==0
+        plot_x = 1:dim_data;
+        range_min = 1;
+        range_max = dim_data;
+    else
+        plot_x = range_min:range_max;
+    end
+    switch save_figure
+        case 1
+            %contral the plot are
+            plot_area = figure(666);
+            plot_area.Name = '主绘图区';
+            plot_area.NumberTitle = 'off';
+            plot_area.Visible = 'off';
+            %plot the figure
+            plot(plot_x,filtered_x(dim_show,range_min:range_max));
+            xlim([range_min-1 range_max+2]);
+            xlabel('数据点');
+            ylabel('数据值');
+            legend('滤波后数据');
+            saveas(plot_area,file);
+            close(plot_area);
+        case 2
+            isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
+                size(filtered_x,1) && size(compare_data,2) == dim_data);
+            if isempty(compare_data)
+                msgbox('真实数据未输入','Error','error');
+            elseif isnot_match
+                msgbox('滤波后数据和真实数据不匹配','Error','error');
+            elseif ~isempty(compare_data)
+                plot_area = figure(666);
+                plot_area.Name = '主绘图区';
+                plot_area.NumberTitle = 'off';
+                plot_area.Visible = 'off';
+                plot(plot_x,filtered_x(dim_show,range_min:range_max),...
+                    plot_x,compare_data(dim_show,range_min:range_max),'*');
+                xlim([range_min-1 range_max+2]);
+                xlabel('数据点');
+                ylabel('数据值');
+                legend('滤波后数据','真实数据');
+                saveas(plot_area,file);
+                close(plot_area);
+            end
+        case 3
+            if strcmp(observe_style,'matrix')
+                trans_filtered_x = init_h * filtered_x;
+            else
+                trans_filtered_x = zeros(dim_z,dim_data);
+                for k = 1:size(trans_filtered_x,2)
+                    trans_filtered_x(:,k) = init_h(filtered_x(:,k));
+                end
+            end
+            plot_area = figure(666);
+            plot_area.Name = '主绘图区';
+            plot_area.NumberTitle = 'off';
+            plot_area.Visible = 'off';
+            plot(plot_x,trans_filtered_x(dim_show,range_min:range_max),...
+                plot_x,observe_data(dim_show,range_min:range_max),'*');
+            xlim([range_min-1 range_max+2]);
+            xlabel('数据点');
+            ylabel('数据值');
+            legend('滤波后数据','观测数据');
+            saveas(plot_area,file);
+            close(plot_area);
+        case 4
+            isnot_match =  ~isempty(compare_data) && ~(size(compare_data,1) == ...
+                size(filtered_x,1) && size(compare_data,2) == dim_data);
+            if isempty(compare_data)
+                msgbox('真实数据未输入','Error','error');
+            elseif isnot_match
+                msgbox('滤波后数据和真实数据不匹配','Error','error');
+            elseif ~isempty(compare_data)
+                plot_area = figure(666);
+                plot_area.Name = '主绘图区';
+                plot_area.NumberTitle = 'off';
+                plot_area.Visible = 'off';
+                if strcmp(observe_style,'matrix')
+                    trans_filtered_x = init_h * filtered_x;
+                    trans_compare = init_h * compare_data;
+                else
+                    trans_filtered_x = zeros(dim_z,dim_data);
+                    trans_compare = zeros(dim_z,dim_data);
+                    for k = 1:size(trans_filtered_x,2)
+                        trans_filtered_x(:,k) = init_h(filtered_x(:,k));
+                        trans_compare(:,k) = init_h(compare_data(:,k));
+                    end
+                end
+                plot(plot_x,trans_filtered_x(dim_show,range_min:range_max),...
+                    plot_x,observe_data(dim_show,range_min:range_max),'*',...
+                    plot_x,trans_compare(dim_show,range_min:range_max),'+');
+                xlim([range_min-1 range_max+2]);
+                xlabel('数据点');
+                ylabel('数据值');
+                legend('滤波后数据(1)','观测数据(2)','真实数据(3)');
+                saveas(plot_area,file);
+                close(plot_area);
+            end
+        otherwise
+            msgbox('保存图形失败','Error','error');
     end
 end
