@@ -766,6 +766,7 @@ if islegal_param && ~isempty(filtered_x)
             xlabel('数据点');
             ylabel('数据值');
             legend('滤波后数据');
+            plot_area.Visible = 'on';
             saveas(plot_area,file);
             close(plot_area);
         case 2
@@ -786,6 +787,7 @@ if islegal_param && ~isempty(filtered_x)
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据','真实数据');
+                plot_area.Visible = 'on';
                 saveas(plot_area,file);
                 close(plot_area);
             end
@@ -808,6 +810,7 @@ if islegal_param && ~isempty(filtered_x)
             xlabel('数据点');
             ylabel('数据值');
             legend('滤波后数据','观测数据');
+            plot_area.Visible = 'on';
             saveas(plot_area,file);
             close(plot_area);
         case 4
@@ -840,7 +843,8 @@ if islegal_param && ~isempty(filtered_x)
                 xlabel('数据点');
                 ylabel('数据值');
                 legend('滤波后数据(1)','观测数据(2)','真实数据(3)');
-                saveas(plot_area,file);
+                plot_area.Visible = 'on';
+                saveas(plot_area,file)
                 close(plot_area);
             end
         otherwise

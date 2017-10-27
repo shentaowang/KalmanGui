@@ -1,5 +1,6 @@
 observe_file = 'mm_observe_01.txt';
 true_file = 'mm_true_01.txt';
+rng('default')
 
 dim_data = 50;
 dim_x = 2;
